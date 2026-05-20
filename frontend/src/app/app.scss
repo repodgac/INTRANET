@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+:host::before,
+:host::after {
+  content: '';
+  position: fixed;
+  inset: auto;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(10px);
+}
+
+:host::before {
+  width: 22rem;
+  height: 22rem;
+  top: 4rem;
+  right: -7rem;
+  background: rgba(0, 95, 115, 0.08);
+}
+
+:host::after {
+  width: 18rem;
+  height: 18rem;
+  bottom: 2rem;
+  left: -5rem;
+  background: rgba(238, 155, 0, 0.12);
+}

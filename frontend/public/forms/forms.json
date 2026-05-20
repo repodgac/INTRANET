@@ -1,0 +1,44 @@
+[
+  {
+    "id": "solicitud-usuario",
+    "title": "Solicitud de usuario",
+    "description": "Formulario de alta o habilitación de usuario institucional.",
+    "filePath": "forms/solicitud-usuario.docx",
+    "fileType": "DOCX"
+  },
+  {
+    "id": "correo-institucional",
+    "title": "Solicitud de correo institucional",
+    "description": "Formulario para la asignación de cuenta de correo institucional.",
+    "filePath": "forms/correo-institucional.docx",
+    "fileType": "DOCX"
+  },
+  {
+    "id": "acceso-internet",
+    "title": "Solicitud de acceso a internet",
+    "description": "Formulario para la gestión de accesos a internet.",
+    "filePath": "forms/acceso-internet.docx",
+    "fileType": "DOCX"
+  },
+  {
+    "id": "tv-proyector",
+    "title": "Solicitud de TV y proyector",
+    "description": "Solicitud de equipo audiovisual para actividades institucionales.",
+    "filePath": "forms/tv-proyector.xlsx",
+    "fileType": "XLSX"
+  },
+  {
+    "id": "usuario-sistema",
+    "title": "Solicitud de usuario del sistema DGAC",
+    "description": "Formulario para la asignación de acceso a sistemas institucionales.",
+    "filePath": "forms/usuario-sistema-dgac.docx",
+    "fileType": "DOCX"
+  },
+  {
+    "id": "solicitud-carpeta-compartida",
+    "title": "Solicitud de carpeta compartida",
+    "description": "Solicitud para la habilitación de acceso a carpeta compartida institucional.",
+    "filePath": "forms/solicitud-carpeta-compartida.docx",
+    "fileType": "DOCX"
+  }
+]
