@@ -3,3 +3,7 @@ frontend/dist/
 backend/node_modules/
 backend/dist/
 backend/.env
+backend/data/
+backend/*.log
+backend/*.out.log
+backend/*.err.log

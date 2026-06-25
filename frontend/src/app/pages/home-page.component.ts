@@ -3,11 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type { DownloadItem } from '../core/models';
+import { AnalyticsService } from '../core/services/analytics.service';
 
 const downloadedDocsKey = 'dgac_downloaded_docs';
 
 interface FeaturedLink {
-  id: string;
+  id: string | number;
   title: string;
   url: string;
   description: string;
@@ -24,56 +25,18 @@ interface PendingPdfItem {
   filePath: string;
 }
 
-const fallbackDownloads: DownloadItem[] = [
-  {
-    id: 'solicitud-usuario',
-    title: 'Solicitud de usuario',
-    description: 'Formulario de alta o habilitacion de usuario institucional.',
-    filePath: 'forms/solicitud-usuario.docx',
-    fileType: 'DOCX'
-  },
-  {
-    id: 'correo-institucional',
-    title: 'Solicitud de correo institucional',
-    description: 'Formulario para la asignacion de cuenta de correo institucional.',
-    filePath: 'forms/correo-institucional.docx',
-    fileType: 'DOCX'
-  },
-  {
-    id: 'acceso-internet',
-    title: 'Solicitud de acceso a internet',
-    description: 'Formulario para la gestion de accesos a internet.',
-    filePath: 'forms/acceso-internet.docx',
-    fileType: 'DOCX'
-  },
-  {
-    id: 'tv-proyector',
-    title: 'Solicitud de TV y proyector',
-    description: 'Solicitud de equipo audiovisual para actividades institucionales.',
-    filePath: 'forms/tv-proyector.xlsx',
-    fileType: 'XLSX'
-  },
-  {
-    id: 'usuario-sistema-dgac',
-    title: 'Solicitud de base de datos',
-    description: 'Formulario para la creacion o acceso a bases de datos.',
-    filePath: 'forms/usuario-sistema-dgac.docx',
-    fileType: 'DOCX'
-  },
-  {
-    id: 'solicitud-carpeta-compartida',
-    title: 'Solicitud de carpeta compartida',
-    description: 'Solicitud para la habilitacion de acceso a carpeta compartida institucional.',
-    filePath: 'forms/solicitud-carpeta-compartida.docx',
-    fileType: 'DOCX'
-  }
-];
+interface PublicLinkResponse {
+  id: number;
+  title: string;
+  description: string | null;
+  url: string;
+}
 
 const featuredLinks: FeaturedLink[] = [
   {
     id: 'portal-interno',
     title: 'Direccion General de Aeronautica Civil',
-    url: 'https://www.dgac.gob.gt/',
+    url: 'https://dgac.gob.gt/',
     description: 'Portal institucional oficial de la DGAC.',
     previewLabel: 'Sitio DGAC',
     previewTone: 'local',
@@ -82,11 +45,20 @@ const featuredLinks: FeaturedLink[] = [
   {
     id: 'tramites-dgac',
     title: 'Portal de tramites DGAC',
-    url: 'http://prueba_tramites.dgacgt.local/auth',
+    url: 'https://tramites.dgac.gob.gt/auth',
     description: 'Acceso para gestionar y autenticar tramites institucionales.',
     previewLabel: 'Tramites DGAC',
     previewTone: 'tramites',
     imagePath: 'branding/dgac-header.png'
+  },
+  {
+    id: 'sistema-interno-dgac',
+    title: 'Sistema interno DGAC',
+    url: 'http://172.16.0.126/',
+    description: 'Acceso al sistema interno institucional para tramites, oficios y gestiones administrativas.',
+    previewLabel: 'Sistema interno DGAC',
+    previewTone: 'dgac',
+    imagePath: 'branding/dgac-oficial.jpeg'
   },
   {
     id: 'ministerio-civ',
@@ -96,15 +68,6 @@ const featuredLinks: FeaturedLink[] = [
     previewLabel: 'Portal CIV',
     previewTone: 'ministry',
     imagePath: 'branding/mciv-oficial.png'
-  },
-  {
-    id: 'portal-dgac-oficial',
-    title: 'Direccion General de Aeronautica Civil',
-    url: 'http://172.16.0.126/',
-    description: 'Portal interno institucional oficial de la Direccion General de Aeronautica Civil.',
-    previewLabel: 'Intranet DGAC',
-    previewTone: 'dgac',
-    imagePath: 'branding/dgac-oficial.jpeg'
   },
   {
     id: 'radio-tgw',
@@ -117,36 +80,33 @@ const featuredLinks: FeaturedLink[] = [
   }
 ];
 
-const pendingPdfDocs: PendingPdfItem[] = [
-  {
-    id: 'computadora-escritorio',
-    title: 'Computadora de escritorio',
-    description: 'Especificaciones tecnicas para equipo de computo de escritorio institucional.',
-    area: 'Equipo',
-    filePath: 'specs/computadora-escritorio.pdf'
+const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'previewTone' | 'imagePath'>> = {
+  'https://dgac.gob.gt/': {
+    previewLabel: 'Sitio DGAC',
+    previewTone: 'local',
+    imagePath: 'branding/dgac-header.png'
   },
-  {
-    id: 'computadora-portatil',
-    title: 'Computadora portatil',
-    description: 'Documento con requerimientos y caracteristicas para computadora portatil.',
-    area: 'Movilidad',
-    filePath: 'specs/computadora-portatil.pdf'
+  'https://tramites.dgac.gob.gt/auth': {
+    previewLabel: 'Tramites DGAC',
+    previewTone: 'tramites',
+    imagePath: 'branding/dgac-header.png'
   },
-  {
-    id: 'escaner',
-    title: 'Escaner',
-    description: 'Ficha de especificaciones para equipo de digitalizacion y escaneo institucional.',
-    area: 'Periferico',
-    filePath: 'specs/escaner.pdf'
+  'https://www.civ.gob.gt/web/guest/inicio': {
+    previewLabel: 'Portal CIV',
+    previewTone: 'ministry',
+    imagePath: 'branding/mciv-oficial.png'
   },
-  {
-    id: 'ups',
-    title: 'UPS',
-    description: 'Especificaciones tecnicas para sistema de respaldo y proteccion electrica.',
-    area: 'Energia',
-    filePath: 'specs/ups.pdf'
+  'http://172.16.0.126/': {
+    previewLabel: 'Intranet DGAC',
+    previewTone: 'dgac',
+    imagePath: 'branding/dgac-oficial.jpeg'
+  },
+  'https://radiotgw.gob.gt/radio-tgw-en-linea/': {
+    previewLabel: 'TGW en linea',
+    previewTone: 'radio',
+    imagePath: 'branding/tgw-linea.png'
   }
-];
+};
 
 @Component({
   selector: 'app-home-page',
@@ -251,7 +211,7 @@ const pendingPdfDocs: PendingPdfItem[] = [
           </button>
         </div>
 
-        <div class="downloads-rail" (wheel)="onDownloadsWheel($event)">
+        <div class="downloads-rail" (wheel)="onDownloadsWheel($event)" *ngIf="downloads().length; else noForms">
           <a
             class="resource-card"
             *ngFor="let item of downloads()"
@@ -313,9 +273,12 @@ const pendingPdfDocs: PendingPdfItem[] = [
           </a>
         </div>
 
-        <p class="downloads-footnote" *ngIf="usingFallback()">
-          Listado provisional de formularios institucionales.
-        </p>
+        <ng-template #noForms>
+          <div class="history-empty">
+            <strong>Sin formularios publicados</strong>
+            <p>Agregue documentos activos en la base de datos para habilitar descargas reales.</p>
+          </div>
+        </ng-template>
       </section>
 
       <section class="download-history" id="descargados" *ngIf="showDownloadHistory()">
@@ -359,21 +322,16 @@ const pendingPdfDocs: PendingPdfItem[] = [
             </div>
           </div>
 
-          <a class="section-action green" href="specs/computadora-escritorio.pdf" target="_blank" rel="noopener noreferrer">
-            Ver PDF descargados
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M9 6.75 15 12l-6 5.25" />
-            </svg>
-          </a>
         </div>
 
-        <div class="card-grid">
+        <div class="card-grid" *ngIf="pendingPdfItems().length; else noSpecs">
           <a
             class="resource-card"
             *ngFor="let item of pendingPdfItems()"
             [href]="item.filePath"
             target="_blank"
             rel="noopener noreferrer"
+            (click)="registerPdfOpen(item)"
           >
             <div class="resource-card-top">
               <div class="resource-icon green" [attr.aria-label]="'Icono de ' + item.title">
@@ -419,6 +377,13 @@ const pendingPdfDocs: PendingPdfItem[] = [
             </div>
           </a>
         </div>
+
+        <ng-template #noSpecs>
+          <div class="history-empty">
+            <strong>Sin especificaciones publicadas</strong>
+            <p>Las especificaciones apareceran aqui cuando existan documentos PDF activos.</p>
+          </div>
+        </ng-template>
       </section>
 
       <section class="panel links-panel" id="enlaces">
@@ -474,6 +439,7 @@ const pendingPdfDocs: PendingPdfItem[] = [
         <div class="footer-side footer-side-right">
           <strong>Portal Interno Institucional DGAC</strong>
           <p>Version 1.0.0</p>
+          <a class="admin-entry" href="/admin/login">Acceso administrativo</a>
         </div>
       </footer>
     </main>
@@ -481,30 +447,60 @@ const pendingPdfDocs: PendingPdfItem[] = [
 })
 export class HomePageComponent {
   private readonly http = inject(HttpClient);
+  private readonly analytics = inject(AnalyticsService);
   private readonly railTargets = new WeakMap<HTMLElement, number>();
   private readonly railFrames = new WeakMap<HTMLElement, number>();
-  protected readonly downloads = signal<DownloadItem[]>(fallbackDownloads);
+  protected readonly downloads = signal<DownloadItem[]>([]);
   protected readonly links = signal(featuredLinks);
-  protected readonly pendingPdfItems = signal(pendingPdfDocs);
-  protected readonly usingFallback = signal(true);
+  protected readonly pendingPdfItems = signal<PendingPdfItem[]>([]);
   protected readonly showDownloadHistory = signal(false);
   protected readonly downloadHistory = signal<Array<DownloadItem & { downloadedAt: string }>>(this.readDownloadedDocs());
 
   constructor() {
-    void this.loadDownloads();
+    this.analytics.trackVisit(window.location.pathname);
+    void this.loadPortalData();
   }
 
-  protected async loadDownloads() {
+  protected async loadPortalData() {
     try {
-      const items = await firstValueFrom(this.http.get<DownloadItem[]>('forms/forms.json'));
+      const [downloads, specs, links] = await Promise.all([
+        firstValueFrom(this.http.get<DownloadItem[]>('/api/public/forms')),
+        firstValueFrom(
+          this.http.get<Array<Omit<PendingPdfItem, 'area'> & { area?: string | null }>>('/api/public/specs')
+        ),
+        firstValueFrom(this.http.get<PublicLinkResponse[]>('/api/public/links'))
+      ]);
 
-      if (items.length) {
-        this.downloads.set(items);
-        this.usingFallback.set(false);
+      this.downloads.set(downloads);
+
+      this.pendingPdfItems.set(
+        specs.map((item) => ({
+          ...item,
+          area: item.area || 'General'
+        }))
+      );
+
+      if (links.length) {
+        this.links.set(
+          links.map((link) => {
+            const presentation = linkPresentationMap[link.url];
+
+            return {
+              id: link.id,
+              title: link.title,
+              url: link.url,
+              description: link.description || 'Enlace institucional disponible.',
+              previewLabel: presentation?.previewLabel || link.title,
+              previewTone: presentation?.previewTone || 'local',
+              imagePath: presentation?.imagePath
+            };
+          })
+        );
       }
     } catch {
-      this.downloads.set(fallbackDownloads);
-      this.usingFallback.set(true);
+      this.downloads.set([]);
+      this.pendingPdfItems.set([]);
+      this.links.set(featuredLinks);
     }
   }
 
@@ -578,10 +574,27 @@ export class HomePageComponent {
 
     this.downloadHistory.set(next);
     sessionStorage.setItem(downloadedDocsKey, JSON.stringify(next));
+    this.analytics.trackDownload({
+      documentId: item.id,
+      title: item.title,
+      filePath: item.filePath,
+      fileType: item.fileType || 'FILE',
+      area: 'Formularios'
+    });
   }
 
   protected toggleDownloadHistory() {
     this.showDownloadHistory.update((value) => !value);
+  }
+
+  protected registerPdfOpen(item: PendingPdfItem) {
+    this.analytics.trackDownload({
+      documentId: item.id,
+      title: item.title,
+      filePath: item.filePath,
+      fileType: 'PDF',
+      area: item.area
+    });
   }
 
   private readDownloadedDocs(): Array<DownloadItem & { downloadedAt: string }> {
