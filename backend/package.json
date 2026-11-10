@@ -21,11 +21,13 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "ldapts": "^8.1.8",
+    "multer": "^2.5.0",
     "pg": "^8.21.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
     "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
     "tsx": "^4.21.0",

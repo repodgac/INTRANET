@@ -18,6 +18,19 @@ export interface PublicLink {
   url: string;
 }
 
+export interface ManagedContentDocument extends PublicDocument {
+  databaseId: number;
+  kind: "form" | "spec";
+  fileName: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface ManagedContentLink extends PublicLink {
+  active: boolean;
+  createdAt: string;
+}
+
 export interface VisitInput {
   visitorId: string;
   path: string;
@@ -536,6 +549,172 @@ export class PortalRepository {
     };
   }
 
+  async listManagedContent() {
+    const [documents, links] = await Promise.all([
+      db.query<{
+        database_id: number;
+        id: string;
+        title: string;
+        description: string | null;
+        file_path: string;
+        file_type: string;
+        area: string | null;
+        file_name: string;
+        active: boolean;
+        created_at: string;
+        category_name: string | null;
+      }>(`
+        SELECT
+          d.id AS database_id,
+          d.code AS id,
+          d.title,
+          d.description,
+          d.file_path,
+          UPPER(d.document_type) AS file_type,
+          d.area,
+          d.file_name,
+          d.active,
+          d.created_at,
+          dc.name AS category_name
+        FROM documents d
+        LEFT JOIN document_categories dc ON dc.id = d.category_id
+        ORDER BY created_at DESC, id DESC
+      `),
+      db.query<{
+        id: number;
+        title: string;
+        description: string | null;
+        url: string;
+        active: boolean;
+        created_at: string;
+      }>(`
+        SELECT id, title, description, url, active, created_at
+        FROM links
+        ORDER BY created_at DESC, id DESC
+      `),
+    ]);
+
+    return {
+      documents: documents.rows.map((row) => ({
+        databaseId: row.database_id,
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        filePath: row.file_path,
+        fileType: row.file_type,
+        area: row.area,
+        fileName: row.file_name,
+        kind: row.category_name === "Especificaciones" ? "spec" : "form",
+        active: row.active,
+        createdAt: row.created_at,
+      })) satisfies ManagedContentDocument[],
+      links: links.rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        url: row.url,
+        active: row.active,
+        createdAt: row.created_at,
+      })) satisfies ManagedContentLink[],
+    };
+  }
+
+  async createManagedDocument(input: {
+    code: string;
+    title: string;
+    description: string | null;
+    documentType: string;
+    fileName: string;
+    filePath: string;
+    mimeType: string;
+    area: string | null;
+    kind: "form" | "spec";
+  }) {
+    const categoryName = input.kind === "spec" ? "Especificaciones" : "Formularios";
+    const result = await db.query<{ id: number }>(
+      `
+        WITH category AS (
+          INSERT INTO document_categories (name, description, active)
+          VALUES ($1, $2, TRUE)
+          ON CONFLICT (name) DO UPDATE SET active = TRUE, updated_at = NOW()
+          RETURNING id
+        )
+        INSERT INTO documents (
+          category_id, code, title, description, document_type,
+          file_name, file_path, mime_type, area, active
+        )
+        SELECT id, $3, $4, $5, $6, $7, $8, $9, $10, TRUE
+        FROM category
+        RETURNING id
+      `,
+      [
+        categoryName,
+        input.kind === "spec" ? "Documentos tecnicos en PDF" : "Documentos institucionales descargables",
+        input.code,
+        input.title,
+        input.description,
+        input.documentType,
+        input.fileName,
+        input.filePath,
+        input.mimeType,
+        input.area,
+      ]
+    );
+
+    return result.rows[0].id;
+  }
+
+  async createManagedLink(input: { title: string; description: string | null; url: string }) {
+    const result = await db.query<{ id: number }>(
+      `
+        INSERT INTO links (title, description, url, active)
+        VALUES ($1, $2, $3, TRUE)
+        RETURNING id
+      `,
+      [input.title, input.description, input.url]
+    );
+
+    return result.rows[0].id;
+  }
+
+  async deleteManagedDocument(documentId: number) {
+    const target = await db.query<{ id: number; file_path: string; has_downloads: boolean }>(
+      `
+        SELECT
+          d.id,
+          d.file_path,
+          EXISTS (
+            SELECT 1 FROM document_downloads dd WHERE dd.document_id = d.id
+          ) AS has_downloads
+        FROM documents d
+        WHERE d.id = $1
+      `,
+      [documentId]
+    );
+
+    const document = target.rows[0];
+    if (!document) return null;
+
+    if (document.has_downloads) {
+      await db.query(
+        `UPDATE documents SET active = FALSE, updated_at = NOW() WHERE id = $1`,
+        [documentId]
+      );
+      return { mode: "deactivated" as const, filePath: document.file_path };
+    }
+
+    await db.query(`DELETE FROM documents WHERE id = $1`, [documentId]);
+    return { mode: "deleted" as const, filePath: document.file_path };
+  }
+
+  async deleteManagedLink(linkId: number) {
+    const result = await db.query<{ id: number }>(
+      `DELETE FROM links WHERE id = $1 RETURNING id`,
+      [linkId]
+    );
+    return result.rowCount === 1;
+  }
+
   async getActiveForms() {
     const result = await db.query<{
       id: string;
@@ -546,15 +725,16 @@ export class PortalRepository {
     }>(
       `
         SELECT
-          code AS id,
-          title,
-          description,
-          file_path,
-          UPPER(document_type) AS file_type
-        FROM documents
-        WHERE active = TRUE
-          AND document_type IN ('docx', 'xlsx', 'form')
-        ORDER BY created_at ASC, id ASC
+          d.code AS id,
+          d.title,
+          d.description,
+          d.file_path,
+          UPPER(d.document_type) AS file_type
+        FROM documents d
+        LEFT JOIN document_categories dc ON dc.id = d.category_id
+        WHERE d.active = TRUE
+          AND COALESCE(dc.name, 'Formularios') <> 'Especificaciones'
+        ORDER BY d.created_at ASC, d.id ASC
       `
     );
 
@@ -577,15 +757,16 @@ export class PortalRepository {
     }>(
       `
         SELECT
-          code AS id,
-          title,
-          description,
-          file_path,
-          area
-        FROM documents
-        WHERE active = TRUE
-          AND document_type = 'pdf'
-        ORDER BY created_at ASC, id ASC
+          d.code AS id,
+          d.title,
+          d.description,
+          d.file_path,
+          d.area
+        FROM documents d
+        LEFT JOIN document_categories dc ON dc.id = d.category_id
+        WHERE d.active = TRUE
+          AND dc.name = 'Especificaciones'
+        ORDER BY d.created_at ASC, d.id ASC
       `
     );
 

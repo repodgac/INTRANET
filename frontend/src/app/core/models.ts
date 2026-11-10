@@ -90,3 +90,25 @@ export interface AdminDashboardSnapshot {
   recentDownloads: DownloadEvent[];
   recentVisits: VisitEvent[];
 }
+
+export interface ManagedContentDocument extends DownloadItem {
+  databaseId: number;
+  kind: 'form' | 'spec';
+  fileName: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface ManagedContentLink {
+  id: number;
+  title: string;
+  description: string | null;
+  url: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface ManagedContentSnapshot {
+  documents: ManagedContentDocument[];
+  links: ManagedContentLink[];
+}

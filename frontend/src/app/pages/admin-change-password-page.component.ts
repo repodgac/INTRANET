@@ -12,14 +12,14 @@ import { AdminAuthService } from '../core/services/admin-auth.service';
       <section class="password-card">
         <div class="password-copy">
           <p class="password-kicker">Seguridad inicial</p>
-          <h1>Cambie su contrasena temporal</h1>
+          <h1>Cambie su contraseña temporal</h1>
           <p class="password-intro">
-            Para proteger el acceso administrativo, debe definir una nueva contrasena antes de
+            Para proteger el acceso administrativo, debe definir una nueva contraseña antes de
             entrar al dashboard.
           </p>
 
           <div class="password-rules">
-            <strong>La nueva contrasena debe incluir:</strong>
+            <strong>La nueva contraseña debe incluir:</strong>
             <ul>
               <li>Al menos 10 caracteres</li>
               <li>Una letra mayuscula</li>
@@ -31,7 +31,7 @@ import { AdminAuthService } from '../core/services/admin-auth.service';
 
         <form class="password-form" (ngSubmit)="submit()">
           <label>
-            <span>Nueva contrasena</span>
+            <span>Nueva contraseña</span>
             <input
               type="password"
               name="newPassword"
@@ -42,7 +42,7 @@ import { AdminAuthService } from '../core/services/admin-auth.service';
           </label>
 
           <label>
-            <span>Confirmar contrasena</span>
+            <span>Confirmar contraseña</span>
             <input
               type="password"
               name="confirmPassword"
@@ -56,7 +56,7 @@ import { AdminAuthService } from '../core/services/admin-auth.service';
           <p class="password-success" *ngIf="successMessage()">{{ successMessage() }}</p>
 
           <button type="submit" [disabled]="submitting()">
-            {{ submitting() ? 'Guardando...' : 'Actualizar contrasena' }}
+            {{ submitting() ? 'Guardando...' : 'Actualizar contraseña' }}
           </button>
         </form>
       </section>
@@ -207,7 +207,7 @@ export class AdminChangePasswordPageComponent {
     this.successMessage.set('');
 
     if (this.newPassword !== this.confirmPassword) {
-      this.errorMessage.set('Las contrasenas no coinciden.');
+      this.errorMessage.set('Las contraseñas no coinciden.');
       return;
     }
 
@@ -215,11 +215,11 @@ export class AdminChangePasswordPageComponent {
 
     try {
       await this.auth.changePassword(this.newPassword);
-      this.successMessage.set('Contrasena actualizada. Redirigiendo al dashboard...');
+      this.successMessage.set('Contraseña actualizada. Redirigiendo al dashboard...');
       setTimeout(() => void this.router.navigateByUrl('/admin/dashboard'), 900);
     } catch (error) {
       this.errorMessage.set(
-        error instanceof Error ? error.message : 'No fue posible actualizar la contrasena.'
+        error instanceof Error ? error.message : 'No fue posible actualizar la contraseña.'
       );
     } finally {
       this.submitting.set(false);

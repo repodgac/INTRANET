@@ -45,7 +45,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
                 type="text"
                 name="loginName"
                 [(ngModel)]="form.loginName"
-                placeholder="gerber.salazar"
+                placeholder="usuario.apellido"
                 required
               />
             </label>
@@ -56,7 +56,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
                 type="text"
                 name="displayName"
                 [(ngModel)]="form.displayName"
-                placeholder="Gerber Eduardo Salazar Estrada"
+                placeholder="Nombre completo"
               />
             </label>
 
@@ -66,7 +66,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
                 type="email"
                 name="email"
                 [(ngModel)]="form.email"
-                placeholder="gerber.salazar@dgacgt.local"
+                placeholder="usuario@dominio.local"
               />
             </label>
 

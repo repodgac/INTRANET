@@ -35,6 +35,9 @@ interface ActivityRow {
         </div>
 
         <div class="topbar-actions">
+          <a class="secondary-link" routerLink="/admin/content">
+            Gestionar contenido
+          </a>
           <a *ngIf="isSuperAdmin()" class="secondary-link" routerLink="/admin/access">
             Gestionar accesos
           </a>

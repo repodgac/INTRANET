@@ -326,8 +326,16 @@ export class AdminLoginPageComponent {
         : this.route.snapshot.queryParamMap.get('redirectTo') || '/admin/dashboard';
 
       await this.router.navigateByUrl(redirectTo);
-    } catch {
-      this.errorMessage.set('No fue posible iniciar sesion.');
+    } catch (error) {
+      const message =
+        typeof error === 'object' &&
+        error !== null &&
+        'error' in error &&
+        typeof (error as { error?: { message?: string } }).error?.message === 'string'
+          ? (error as { error: { message: string } }).error.message
+          : 'No fue posible iniciar sesion.';
+
+      this.errorMessage.set(message);
     } finally {
       this.submitting.set(false);
     }

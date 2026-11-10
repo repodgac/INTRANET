@@ -27,6 +27,14 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'admin/content',
+    canActivate: [adminAuthGuard],
+    loadComponent: () =>
+      import('./pages/admin-content-management-page.component').then(
+        (m) => m.AdminContentManagementPageComponent
+      )
+  },
+  {
     path: 'admin/change-password',
     canActivate: [adminAuthGuard],
     loadComponent: () =>

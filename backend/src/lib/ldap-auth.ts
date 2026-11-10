@@ -34,7 +34,7 @@ function buildSearchFilter(username: string) {
 }
 
 export function isLdapEnabled() {
-  return Boolean(env.ldapUrl.trim() && env.ldapBaseDn.trim());
+  return env.authMode === "ldap" && Boolean(env.ldapUrl.trim() && env.ldapBaseDn.trim());
 }
 
 export async function authenticateWithLdap(username: string, password: string): Promise<AuthenticatedLdapUser | null> {
