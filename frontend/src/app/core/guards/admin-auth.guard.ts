@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AdminAuthService } from '../services/admin-auth.service';
+import { landingPageForRole } from '../auth/role-access';
 
 export const adminAuthGuard: CanActivateFn = async (_route, state) => {
   const auth = inject(AdminAuthService);
@@ -15,7 +16,7 @@ export const adminAuthGuard: CanActivateFn = async (_route, state) => {
       }
 
       if (!user.mustChangePassword && state.url === '/admin/change-password') {
-        return router.createUrlTree(['/admin/dashboard']);
+        return router.createUrlTree([landingPageForRole(user.role)]);
       }
 
       return true;

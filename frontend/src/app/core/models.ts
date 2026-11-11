@@ -1,4 +1,4 @@
-export type AdminRole = 'admin' | 'super_admin';
+export type AdminRole = 'admin' | 'super_admin' | 'hr_admin';
 
 export interface DownloadItem {
   id: string;

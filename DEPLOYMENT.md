@@ -55,11 +55,22 @@ El backend compilado queda en `backend/dist`. El frontend queda en `frontend/dis
 1. Respaldar PostgreSQL, el `.env` productivo y `UPLOAD_DIR`.
 2. Detener el servicio del backend.
 3. Actualizar el codigo desde Git.
-4. Ejecutar `npm ci` y las compilaciones.
-5. Conservar el `.env` productivo; nunca sustituirlo por `.env.example`.
-6. Publicar el frontend compilado en el sitio web.
-7. Iniciar el servicio del backend.
-8. Verificar `GET /api/health`, login, dashboard, carga y descarga.
+4. Aplicar las migraciones pendientes antes de iniciar la nueva version.
+5. Ejecutar `npm ci` y las compilaciones.
+6. Conservar el `.env` productivo; nunca sustituirlo por `.env.example`.
+7. Publicar el frontend compilado en el sitio web.
+8. Iniciar el servicio del backend.
+9. Verificar `GET /api/health`, login, dashboard, carga y descarga.
+
+### Migracion del rol de RR. HH.
+
+Esta version requiere ampliar la validacion de roles sin modificar los usuarios existentes:
+
+```powershell
+psql -d portal_dashboard_db -f backend/src/data/migrations/20261111-add-hr-admin-role.sql
+```
+
+Ejecutar el comando con una cuenta que pueda alterar `admin_users`. La migracion es transaccional y puede volver a ejecutarse si el constraint conserva el nombre `chk_admin_users_role`.
 
 ## Proxy requerido
 

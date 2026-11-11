@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { env } from "../config/env";
 
-export type AdminRole = "admin" | "super_admin";
+export type AdminRole = "admin" | "super_admin" | "hr_admin";
 
 interface TokenPayload {
   uid: number;
@@ -69,7 +69,7 @@ export function verifyAdminToken(token: string) {
     const parsedHeader = JSON.parse(decodeBase64Url(encodedHeader)) as typeof header;
     const payload = JSON.parse(decodeBase64Url(encodedPayload)) as TokenPayload;
 
-    if (parsedHeader.alg !== "HS256" || !["admin", "super_admin"].includes(payload.role)) {
+    if (parsedHeader.alg !== "HS256" || !["admin", "super_admin", "hr_admin"].includes(payload.role)) {
       return null;
     }
 

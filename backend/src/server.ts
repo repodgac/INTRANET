@@ -5,9 +5,9 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { env } from "./config/env";
-import { createAdminToken } from "./lib/auth";
+import { createAdminToken, type AdminRole } from "./lib/auth";
 import { authenticateWithLdap, isLdapEnabled } from "./lib/ldap-auth";
-import { requireAdminAuth, requireSuperAdmin, type AuthenticatedRequest } from "./middleware/auth";
+import { requireAdminAuth, requireRoles, requireSuperAdmin, type AuthenticatedRequest } from "./middleware/auth";
 import { PortalRepository } from "./lib/portal-repository";
 
 const app = express();
@@ -166,17 +166,18 @@ app.post("/api/analytics/download", async (req, res) => {
   res.status(201).json({ status: "recorded" });
 });
 
-app.get("/api/admin/dashboard", requireAdminAuth, async (_req, res) => {
+app.get("/api/admin/dashboard", requireAdminAuth, requireRoles("admin", "super_admin"), async (_req, res) => {
   res.json(await portalRepository.getDashboardSnapshot());
 });
 
-app.get("/api/admin/content", requireAdminAuth, async (_req, res) => {
+app.get("/api/admin/content", requireAdminAuth, requireRoles("admin", "super_admin"), async (_req, res) => {
   res.json(await portalRepository.listManagedContent());
 });
 
 app.post(
   "/api/admin/documents",
   requireAdminAuth,
+  requireRoles("admin", "super_admin"),
   contentUpload.single("file"),
   async (req: AuthenticatedRequest, res) => {
     const { title, description, area, kind } = req.body as {
@@ -240,7 +241,7 @@ app.post(
   }
 );
 
-app.post("/api/admin/links", requireAdminAuth, async (req: AuthenticatedRequest, res) => {
+app.post("/api/admin/links", requireAdminAuth, requireRoles("admin", "super_admin"), async (req: AuthenticatedRequest, res) => {
   const { title, description, url } = req.body as {
     title?: string;
     description?: string;
@@ -269,7 +270,7 @@ app.post("/api/admin/links", requireAdminAuth, async (req: AuthenticatedRequest,
   res.status(201).json({ id });
 });
 
-app.delete("/api/admin/documents/:id", requireAdminAuth, async (req: AuthenticatedRequest, res) => {
+app.delete("/api/admin/documents/:id", requireAdminAuth, requireRoles("admin", "super_admin"), async (req: AuthenticatedRequest, res) => {
   const documentId = Number(req.params.id);
   if (!Number.isInteger(documentId)) {
     return res.status(400).json({ message: "Identificador de documento invalido." });
@@ -287,7 +288,7 @@ app.delete("/api/admin/documents/:id", requireAdminAuth, async (req: Authenticat
   res.json(result);
 });
 
-app.delete("/api/admin/links/:id", requireAdminAuth, async (req: AuthenticatedRequest, res) => {
+app.delete("/api/admin/links/:id", requireAdminAuth, requireRoles("admin", "super_admin"), async (req: AuthenticatedRequest, res) => {
   const linkId = Number(req.params.id);
   if (!Number.isInteger(linkId)) {
     return res.status(400).json({ message: "Identificador de enlace invalido." });
@@ -320,10 +321,10 @@ app.post(
       loginName?: string;
       email?: string | null;
       displayName?: string | null;
-      role?: "admin" | "super_admin";
+      role?: AdminRole;
     };
 
-    if (!loginName || !role) {
+    if (!loginName || !role || !isAdminRole(role)) {
       return res.status(400).json({ message: "loginName y role son requeridos." });
     }
 
@@ -359,11 +360,11 @@ app.put(
       loginName?: string;
       email?: string | null;
       displayName?: string | null;
-      role?: "admin" | "super_admin";
+      role?: AdminRole;
       active?: boolean;
     };
 
-    if (!Number.isInteger(adminId) || !loginName || !role || typeof active !== "boolean") {
+    if (!Number.isInteger(adminId) || !loginName || !role || !isAdminRole(role) || typeof active !== "boolean") {
       return res.status(400).json({ message: "Datos incompletos para actualizar el admin." });
     }
 
@@ -491,6 +492,10 @@ function isUniqueViolation(error: unknown) {
     "code" in error &&
     (error as { code?: string }).code === "23505"
   );
+}
+
+function isAdminRole(role: string): role is AdminRole {
+  return ["admin", "super_admin", "hr_admin"].includes(role);
 }
 
 function slugify(value: string) {

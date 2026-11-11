@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminAuthService } from '../core/services/admin-auth.service';
+import { landingPageForRole } from '../core/auth/role-access';
 
 @Component({
   selector: 'app-admin-change-password-page',
@@ -216,7 +217,11 @@ export class AdminChangePasswordPageComponent {
     try {
       await this.auth.changePassword(this.newPassword);
       this.successMessage.set('Contraseña actualizada. Redirigiendo al dashboard...');
-      setTimeout(() => void this.router.navigateByUrl('/admin/dashboard'), 900);
+      const role = this.auth.currentUser()?.role;
+      setTimeout(
+        () => void this.router.navigateByUrl(role ? landingPageForRole(role) : '/admin/login'),
+        900
+      );
     } catch (error) {
       this.errorMessage.set(
         error instanceof Error ? error.message : 'No fue posible actualizar la contraseña.'

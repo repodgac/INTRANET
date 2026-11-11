@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import type { AdminDashboardSnapshot, DashboardTrendPoint, TopDocument } from '../core/models';
 import { AdminAuthService } from '../core/services/admin-auth.service';
 import { AnalyticsService } from '../core/services/analytics.service';
@@ -22,28 +22,17 @@ interface ActivityRow {
 
 @Component({
   selector: 'app-admin-dashboard-page',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <main class="dashboard-shell">
-      <header class="dashboard-topbar">
+      <header class="dashboard-topbar page-heading">
         <div>
-          <p class="eyebrow">Resumen del portal</p>
-          <h1>Monitoreo general del sitio en tiempo real</h1>
+          <h1>Resumen del portal</h1>
           <p class="subtitle">
             Vista ejecutiva de visitas, descargas y actividad institucional reciente.
           </p>
         </div>
 
-        <div class="topbar-actions">
-          <a class="secondary-link" routerLink="/admin/content">
-            Gestionar contenido
-          </a>
-          <a *ngIf="isSuperAdmin()" class="secondary-link" routerLink="/admin/access">
-            Gestionar accesos
-          </a>
-          <a class="secondary-link" routerLink="/">Volver al portal</a>
-          <button type="button" class="primary-button" (click)="logout()">Cerrar sesion</button>
-        </div>
       </header>
 
       <section class="state-card" *ngIf="loading()">Cargando indicadores del portal...</section>
@@ -65,8 +54,7 @@ interface ActivityRow {
           <article class="panel trend-panel">
             <div class="panel-heading">
               <div>
-                <p class="panel-tag">Actividad en el tiempo</p>
-                <h2>Ultimos 7 dias</h2>
+                <h2>Actividad de los &uacute;ltimos 7 d&iacute;as</h2>
               </div>
               <div class="trend-legend">
                 <span><i class="dot blue"></i>Visitas</span>
@@ -74,9 +62,12 @@ interface ActivityRow {
               </div>
             </div>
 
-            <svg class="trend-chart" viewBox="0 0 720 280" preserveAspectRatio="none" aria-hidden="true">
+            <svg class="trend-chart" viewBox="0 0 720 280" preserveAspectRatio="none" role="img" aria-label="Actividad de visitas y descargas durante los últimos siete días">
               <g class="grid">
-                <line *ngFor="let row of gridRows" x1="0" [attr.y1]="row" x2="720" [attr.y2]="row"></line>
+                <ng-container *ngFor="let tick of yAxisTicks()">
+                  <line x1="42" [attr.y1]="tick.y" x2="720" [attr.y2]="tick.y"></line>
+                  <text x="32" [attr.y]="tick.y + 4" text-anchor="end">{{ tick.value }}</text>
+                </ng-container>
               </g>
               <polyline
                 class="trend-line visits-line"
@@ -114,11 +105,16 @@ interface ActivityRow {
           <article class="panel breakdown-panel">
             <div class="panel-heading">
               <div>
-                <p class="panel-tag">Descargas por tipo</p>
-                <h2>Composicion documental</h2>
+                <h2>Descargas por tipo</h2>
               </div>
             </div>
 
+            <div class="single-breakdown" *ngIf="downloadBreakdown().length === 1; else multipleBreakdown">
+              <div class="single-format"><span class="file-symbol" aria-hidden="true">PDF</span><strong>{{ downloadBreakdown()[0].label }}</strong></div>
+              <div class="compact-bar"><i></i></div>
+              <span>{{ downloadBreakdown()[0].total }} {{ downloadBreakdown()[0].total === 1 ? 'descarga' : 'descargas' }}</span>
+            </div>
+            <ng-template #multipleBreakdown>
             <div class="breakdown-layout" *ngIf="downloadBreakdown().length; else noBreakdown">
               <div
                 class="donut-chart"
@@ -141,6 +137,7 @@ interface ActivityRow {
                 </article>
               </div>
             </div>
+            </ng-template>
           </article>
         </section>
 
@@ -148,7 +145,6 @@ interface ActivityRow {
           <article class="panel table-panel">
             <div class="panel-heading">
               <div>
-                <p class="panel-tag">Ranking</p>
                 <h2>Documentos mas descargados</h2>
               </div>
             </div>
@@ -180,8 +176,7 @@ interface ActivityRow {
           <article class="panel activity-panel">
             <div class="panel-heading">
               <div>
-                <p class="panel-tag">Actividad reciente</p>
-                <h2>Eventos destacados</h2>
+                <h2>Actividad reciente</h2>
               </div>
             </div>
 
@@ -214,12 +209,12 @@ interface ActivityRow {
   `,
   styles: `
     .dashboard-shell {
-      width: min(100%, 1460px);
-      min-height: 100vh;
-      margin: 0 auto;
-      padding: 1.4rem 1.2rem 2rem;
+      width: 100%;
+      min-height: 0;
+      padding: 0;
       display: grid;
       gap: 1rem;
+      font-size: 13px;
     }
 
     .dashboard-topbar,
@@ -233,14 +228,17 @@ interface ActivityRow {
     }
 
     .dashboard-topbar {
-      padding: 1.2rem 1.4rem;
+      padding: .15rem .2rem .45rem;
       display: flex;
       justify-content: space-between;
       gap: 1rem;
       align-items: end;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
     }
 
-    .eyebrow,
     .panel-tag {
       margin: 0 0 0.2rem;
       text-transform: uppercase;
@@ -257,12 +255,13 @@ interface ActivityRow {
     }
 
     h1 {
-      font-size: clamp(1.75rem, 3vw, 2.55rem);
+      max-width: none;
+      font-size: 1.75rem;
       line-height: 1;
     }
 
     h2 {
-      font-size: 1.25rem;
+      font-size: 1.125rem;
     }
 
     .subtitle {
@@ -270,6 +269,7 @@ interface ActivityRow {
       color: #55739f;
       line-height: 1.55;
       max-width: 42rem;
+      font-size: 1rem;
     }
 
     .topbar-actions {
@@ -326,16 +326,18 @@ interface ActivityRow {
     }
 
     .hero-grid {
-      grid-template-columns: minmax(0, 1.4fr) minmax(330px, 0.8fr);
+      grid-template-columns: minmax(0, 3fr) minmax(330px, 2fr);
     }
 
     .details-grid {
-      grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
     }
 
     .metric-card,
     .panel {
       padding: 1.2rem;
+      border-radius: 14px;
     }
 
     .metric-card {
@@ -343,7 +345,7 @@ interface ActivityRow {
       grid-template-columns: auto 1fr;
       gap: 0.9rem;
       align-items: center;
-      min-height: 8.9rem;
+      min-height: 7rem;
       height: 100%;
     }
 
@@ -385,12 +387,12 @@ interface ActivityRow {
     .metric-copy span {
       color: #56729c;
       font-weight: 700;
-      font-size: 0.92rem;
+      font-size: .92rem;
     }
 
     .metric-copy strong {
       color: #173f79;
-      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-size: 1.9rem;
       line-height: 1;
     }
 
@@ -419,7 +421,7 @@ interface ActivityRow {
       flex-wrap: wrap;
       color: #5e769f;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: .9rem;
     }
 
     .trend-legend span {
@@ -453,6 +455,8 @@ interface ActivityRow {
       stroke: rgba(122, 153, 211, 0.18);
       stroke-width: 1;
     }
+
+    .grid text { fill: #71839d; font-size: 12px; }
 
     .trend-line {
       fill: none;
@@ -488,7 +492,7 @@ interface ActivityRow {
       gap: 0.5rem;
       margin-top: 0.4rem;
       color: #60789f;
-      font-size: 0.9rem;
+      font-size: .9rem;
       text-align: center;
     }
 
@@ -499,6 +503,12 @@ interface ActivityRow {
       align-items: center;
       min-height: 320px;
     }
+
+    .single-breakdown { min-height: 116px; display: grid; grid-template-columns: auto minmax(120px, 1fr) auto; align-items: center; gap: 1rem; }
+    .single-format { display: flex; align-items: center; gap: .65rem; color: #183f74; }
+    .file-symbol { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 9px; background: #e8f1ff; color: #1763d5; font-size: .68rem; font-weight: 800; }
+    .compact-bar { height: 10px; overflow: hidden; border-radius: 999px; background: #e4ebf5; } .compact-bar i { display: block; width: 100%; height: 100%; border-radius: inherit; background: #2870e5; }
+    .single-breakdown > span { color: #526b89; white-space: nowrap; }
 
     .donut-chart {
       width: 210px;
@@ -592,7 +602,7 @@ interface ActivityRow {
 
     th {
       color: #5d789f;
-      font-size: 0.85rem;
+      font-size: .85rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
@@ -639,7 +649,7 @@ interface ActivityRow {
 
     .activity-item span {
       color: #5d789f;
-      font-size: 0.9rem;
+      font-size: .9rem;
       text-align: right;
     }
 
@@ -671,6 +681,8 @@ interface ActivityRow {
       .breakdown-layout {
         grid-template-columns: 1fr;
       }
+
+      .single-breakdown { grid-template-columns: 1fr; gap: .65rem; }
 
       .metrics-grid {
         grid-template-columns: 1fr;
@@ -704,7 +716,6 @@ export class AdminDashboardPageComponent {
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal('');
   protected readonly isSuperAdmin = this.auth.isSuperAdmin;
-  protected readonly gridRows = [30, 90, 150, 210, 270];
   protected readonly trendMax = computed(() => {
     const snapshot = this.snapshot();
 
@@ -712,11 +723,20 @@ export class AdminDashboardPageComponent {
       return 1;
     }
 
-    return Math.max(
+    const maximum = Math.max(
       ...snapshot.trends.visitsByDay.map((item) => item.total),
       ...snapshot.trends.downloadsByDay.map((item) => item.total),
       1
     );
+    const step = Math.max(1, Math.ceil(maximum / 4));
+    return step * 4;
+  });
+  protected readonly yAxisTicks = computed(() => {
+    const maximum = this.trendMax();
+    return Array.from({ length: 5 }, (_, index) => ({
+      value: maximum - (maximum / 4) * index,
+      y: 18 + (240 / 4) * index
+    }));
   });
   protected readonly metricCards = computed(() => {
     const snapshot = this.snapshot();
@@ -862,7 +882,7 @@ export class AdminDashboardPageComponent {
   protected chartPoints(points: DashboardTrendPoint[], max: number) {
     const width = 720;
     const height = 280;
-    const leftPadding = 16;
+    const leftPadding = 44;
     const rightPadding = 16;
     const topPadding = 18;
     const bottomPadding = 22;

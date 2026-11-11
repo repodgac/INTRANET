@@ -1,41 +1,36 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import type { AdminRole, ManagedAdminUser } from '../core/models';
+import { roleLabel } from '../core/auth/role-access';
 import { AdminAuthService } from '../core/services/admin-auth.service';
 import { AdminManagementService } from '../core/services/admin-management.service';
 
 @Component({
   selector: 'app-admin-access-management-page',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
     <main class="access-shell">
-      <header class="access-hero">
+      <header class="access-hero page-heading">
         <div>
-          <p class="access-kicker">Super administrador</p>
-          <h1>Control de accesos administrativos</h1>
+          <h1>Control de accesos</h1>
           <p class="access-summary">
             Autorice, actualice o retire el ingreso al panel usando cuentas del dominio DGAC.
           </p>
         </div>
 
-        <div class="access-actions">
-          <a routerLink="/admin/dashboard">Ver dashboard</a>
-          <button type="button" (click)="logout()">Cerrar sesion</button>
-        </div>
+        <button class="authorize-button" type="button" (click)="openCreateForm()">＋ Autorizar administrador</button>
       </header>
 
       <section class="access-layout">
-        <article class="access-card form-card">
+        <article class="access-card form-card" *ngIf="showForm()">
           <div class="card-heading">
             <div>
               <p class="card-tag">Alta rapida</p>
               <h2>{{ editingId() ? 'Editar admin' : 'Agregar admin' }}</h2>
             </div>
-            <button type="button" class="ghost-button" *ngIf="editingId()" (click)="resetForm()">
-              Cancelar
-            </button>
+            <button type="button" class="ghost-button" (click)="resetForm()">Cerrar</button>
           </div>
 
           <form class="access-form" (ngSubmit)="submitForm()">
@@ -75,6 +70,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
               <select name="role" [(ngModel)]="form.role">
                 <option value="admin">Admin</option>
                 <option value="super_admin">Super admin</option>
+                <option value="hr_admin">Administrador de RR. HH.</option>
               </select>
             </label>
 
@@ -101,7 +97,6 @@ import { AdminManagementService } from '../core/services/admin-management.servic
         <article class="access-card list-card">
           <div class="card-heading">
             <div>
-              <p class="card-tag teal">Mantenimiento</p>
               <h2>Admins autorizados</h2>
             </div>
             <div class="toolbar-actions">
@@ -125,26 +120,17 @@ import { AdminManagementService } from '../core/services/admin-management.servic
           <section class="state-block error" *ngIf="loadError()">{{ loadError() }}</section>
 
           <div class="admin-list" *ngIf="!loading() && filteredAdmins().length">
+            <div class="admin-table-head" aria-hidden="true">
+              <span>Usuario</span><span>Rol</span><span>Estado</span><span>&Uacute;ltimo acceso</span><span>Acciones</span>
+            </div>
             <article class="admin-item" *ngFor="let admin of filteredAdmins()">
-              <div class="admin-main">
-                <div class="identity">
-                  <strong>{{ admin.displayName || admin.loginName }}</strong>
-                  <p>{{ admin.loginName }} <span *ngIf="admin.email">- {{ admin.email }}</span></p>
-                </div>
-
-                <div class="chips">
-                  <span class="chip role">{{ admin.role === 'super_admin' ? 'Super admin' : 'Admin' }}</span>
-                  <span class="chip" [class.inactive]="!admin.active">
-                    {{ admin.active ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </div>
+              <div class="identity">
+                <strong>{{ admin.displayName || admin.loginName }}</strong>
+                <p>{{ admin.loginName }} <span *ngIf="admin.email">&middot; {{ admin.email }}</span></p>
               </div>
-
-              <div class="admin-meta">
-                <span>Ultimo acceso: {{ formatLastLogin(admin.lastLoginAt) }}</span>
-                <span>Actualizado: {{ shortDateTime(admin.updatedAt) }}</span>
-              </div>
-
+              <div><span class="chip role">{{ displayRole(admin.role) }}</span></div>
+              <div><span class="chip" [class.inactive]="!admin.active">{{ admin.active ? 'Activo' : 'Inactivo' }}</span></div>
+              <div class="last-access"><span>{{ formatLastLogin(admin.lastLoginAt) }}</span></div>
               <div class="admin-actions">
                 <button type="button" class="secondary-button" (click)="startEdit(admin)">Editar</button>
                 <button
@@ -168,12 +154,13 @@ import { AdminManagementService } from '../core/services/admin-management.servic
   `,
   styles: `
     .access-shell {
-      width: min(100%, 1460px);
-      min-height: 100vh;
-      margin: 0 auto;
-      padding: 1.5rem 1.2rem 2rem;
+      width: 100%;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
       display: grid;
       gap: 1.2rem;
+      font-size: 13px;
     }
 
     .access-hero,
@@ -186,14 +173,15 @@ import { AdminManagementService } from '../core/services/admin-management.servic
     }
 
     .access-hero {
-      padding: 1.8rem;
+      padding: .15rem .2rem .45rem;
       display: flex;
-      align-items: end;
+      align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      background:
-        radial-gradient(circle at top right, rgba(27, 161, 147, 0.12), transparent 28%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(239, 247, 255, 0.96));
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
     }
 
     .access-kicker,
@@ -217,16 +205,17 @@ import { AdminManagementService } from '../core/services/admin-management.servic
     }
 
     h1 {
-      font-size: clamp(2rem, 3.8vw, 3.35rem);
-      line-height: 0.98;
+      max-width: none;
+      font-size: 1.75rem;
+      line-height: 1.1;
     }
 
     h2 {
-      font-size: 1.35rem;
+      font-size: 1.125rem;
     }
 
     .access-summary {
-      margin: 0.9rem 0 0;
+      margin: 0.45rem 0 0;
       max-width: 42rem;
       line-height: 1.7;
       color: #51709e;
@@ -275,22 +264,48 @@ import { AdminManagementService } from '../core/services/admin-management.servic
     }
 
     .danger-button {
-      background: linear-gradient(180deg, #d94f5c, #b63844);
-      color: #fff;
+      background: #fff7f8;
+      color: #b63844;
+      border-color: #efc1c6;
     }
 
     .access-layout {
       display: grid;
-      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 1rem;
       align-items: start;
     }
 
     .access-card {
-      padding: 1.3rem;
+      padding: 1.1rem;
       display: grid;
       gap: 1rem;
     }
+
+    .authorize-button {
+      min-height: 42px;
+      padding: .75rem 1rem;
+      border: 0;
+      border-radius: 9px;
+      background: #125fd4;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .form-card {
+      position: fixed;
+      z-index: 60;
+      top: 50%;
+      left: 50%;
+      width: min(520px, calc(100% - 2rem));
+      max-height: calc(100vh - 2rem);
+      overflow-y: auto;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 100vmax rgba(5, 22, 45, .58), 0 24px 70px rgba(7, 31, 62, .3);
+    }
+
+    .list-card { border-radius: 14px; }
 
     .card-heading,
     .admin-main,
@@ -360,26 +375,17 @@ import { AdminManagementService } from '../core/services/admin-management.servic
       background: rgba(255, 255, 255, 0.84);
     }
 
-    .admin-list {
-      display: grid;
-      gap: 0.85rem;
-    }
+    .admin-list { display: grid; overflow-x: auto; }
+
+    .admin-table-head,
+    .admin-item { min-width: 850px; display: grid; grid-template-columns: minmax(300px, 1.55fr) minmax(180px, .85fr) 110px minmax(170px, .8fr) 190px; gap: 1rem; align-items: center; }
+
+    .admin-table-head { padding: .75rem 1rem; border-radius: 10px; background: #edf3fb; color: #183252; font-size: .78rem; font-weight: 800; }
 
     .admin-item {
-      display: grid;
-      gap: 0.8rem;
-      padding: 1rem;
-      border: 1px solid rgba(119, 153, 214, 0.16);
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.86);
-    }
-
-    .identity,
-    .chips {
-      display: flex;
-      gap: 0.65rem;
-      align-items: center;
-      flex-wrap: wrap;
+      padding: .9rem 1rem;
+      border-bottom: 1px solid #e0e9f4;
+      background: #fff;
     }
 
     .identity {
@@ -388,7 +394,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
     }
 
     .identity p,
-    .admin-meta span {
+    .last-access span {
       margin: 0;
       color: #5a749f;
     }
@@ -399,7 +405,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
       background: #eaf2ff;
       color: #245fdb;
       font-weight: 700;
-      font-size: 0.86rem;
+      font-size: .86rem;
     }
 
     .chip.role {
@@ -417,6 +423,8 @@ import { AdminManagementService } from '../core/services/admin-management.servic
       align-items: stretch;
     }
 
+    .admin-actions { flex-wrap: nowrap; gap: .5rem; }
+
     .toolbar-actions .ghost-button {
       min-width: 7rem;
       flex: 0 0 7rem;
@@ -428,8 +436,11 @@ import { AdminManagementService } from '../core/services/admin-management.servic
     }
 
     .admin-actions button {
-      min-width: 6.6rem;
-      flex: 0 0 6.6rem;
+      min-width: 5.2rem;
+      min-height: 38px;
+      padding: .55rem .8rem;
+      border-radius: 8px;
+      flex: 0 0 auto;
     }
 
     @media (max-width: 1080px) {
@@ -440,9 +451,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
 
     @media (max-width: 760px) {
       .access-hero,
-      .card-heading,
-      .admin-main,
-      .admin-meta {
+      .card-heading {
         display: grid;
       }
 
@@ -474,6 +483,7 @@ export class AdminAccessManagementPageComponent {
   protected readonly editingId = signal<number | null>(null);
   protected readonly errorMessage = signal('');
   protected readonly successMessage = signal('');
+  protected readonly showForm = signal(false);
   protected readonly currentUser = computed(() => this.auth.currentUser());
   protected readonly filteredAdmins = computed(() => {
     const filter = this.statusFilter();
@@ -548,6 +558,7 @@ export class AdminAccessManagementPageComponent {
   }
 
   protected startEdit(admin: ManagedAdminUser) {
+    this.showForm.set(true);
     this.editingId.set(admin.id);
     this.errorMessage.set('');
     this.successMessage.set('');
@@ -599,7 +610,16 @@ export class AdminAccessManagementPageComponent {
   protected resetForm() {
     this.editingId.set(null);
     this.form = this.emptyForm();
+    this.showForm.set(false);
   }
+
+  protected openCreateForm() {
+    this.editingId.set(null);
+    this.form = this.emptyForm();
+    this.showForm.set(true);
+  }
+
+  protected displayRole(role: AdminRole) { return roleLabel(role); }
 
   protected isCurrentUser(admin: ManagedAdminUser) {
     return this.currentUser()?.username === admin.loginName;

@@ -30,14 +30,14 @@ export async function requireAdminAuth(req: AuthenticatedRequest, res: Response,
 
   const admin = await portalRepository.getAdminUserByLoginName(payload.sub);
 
-  if (!admin?.active) {
+  if (!admin?.active || admin.id !== payload.uid) {
     return res.status(401).json({ message: "Sesion invalida o expirada." });
   }
 
   req.adminUser = {
     id: admin.id,
     username: admin.login_name ?? admin.username,
-    role: payload.role,
+    role: admin.role,
     mustChangePassword: isLdapEnabled() ? false : admin.must_change_password,
   };
 
@@ -50,4 +50,14 @@ export function requireSuperAdmin(req: AuthenticatedRequest, res: Response, next
   }
 
   next();
+}
+
+export function requireRoles(...roles: AdminRole[]) {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    if (!req.adminUser || !roles.includes(req.adminUser.role)) {
+      return res.status(403).json({ message: "No tiene permisos para realizar esta accion." });
+    }
+
+    next();
+  };
 }

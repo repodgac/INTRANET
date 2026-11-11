@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminAuthService } from '../core/services/admin-auth.service';
+import { landingPageForRole } from '../core/auth/role-access';
 
 @Component({
   selector: 'app-admin-login-page',
@@ -323,7 +324,9 @@ export class AdminLoginPageComponent {
       const session = await this.auth.login(this.username.trim(), this.password);
       const redirectTo = session.user.mustChangePassword
         ? '/admin/change-password'
-        : this.route.snapshot.queryParamMap.get('redirectTo') || '/admin/dashboard';
+        : session.user.role === 'hr_admin'
+          ? landingPageForRole(session.user.role)
+          : this.route.snapshot.queryParamMap.get('redirectTo') || landingPageForRole(session.user.role);
 
       await this.router.navigateByUrl(redirectTo);
     } catch (error) {

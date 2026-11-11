@@ -119,6 +119,26 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
         </div>
       </header>
 
+      <section class="civ-notice" aria-labelledby="civ-notice-title">
+        <div class="civ-notice-copy">
+          <p class="civ-notice-label">
+            <span class="civ-notice-label-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 13v-2l11-4v10L4 13Zm11-3 4-2v8l-4-2M6 14l1 5h3l-1-5" /></svg>
+            </span>
+            Aviso prioritario
+          </p>
+          <h1 id="civ-notice-title">¿C&oacute;mo presentar una denuncia en el CIV?</h1>
+          <p>Conoce los canales de atenci&oacute;n de la Unidad de Asuntos de Probidad.</p>
+          <a class="civ-notice-action" href="/afiche-civ" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8M19 14v5H5V5h5" /></svg>
+            Ver afiche completo
+          </a>
+        </div>
+        <a class="civ-poster" href="/afiche-civ" target="_blank" rel="noopener noreferrer" aria-label="Abrir afiche completo sobre cómo presentar una denuncia en el CIV">
+          <img src="branding/civ-denuncias.png" alt="Afiche informativo: cómo presentar una denuncia en el CIV" />
+        </a>
+      </section>
+
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Portal interno institucional</p>

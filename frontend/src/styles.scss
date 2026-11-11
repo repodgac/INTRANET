@@ -125,6 +125,45 @@ textarea {
   display: block;
   height: auto;
 }
+
+.civ-notice {
+  position: relative;
+  min-height: 25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 340px);
+  align-items: center;
+  gap: 2.5rem;
+  padding: 2rem 3rem;
+  overflow: hidden;
+  border: 1px solid #3f82f7;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 78% 45%, rgba(80, 145, 255, .18), transparent 26%),
+    linear-gradient(135deg, rgba(255,255,255,.98), rgba(230,241,255,.94));
+  box-shadow: 0 18px 40px rgba(39, 94, 174, .12);
+}
+
+.civ-notice::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, rgba(255,255,255,.5), transparent 55%);
+}
+
+.civ-notice-copy { position: relative; z-index: 1; display: grid; justify-items: start; gap: .75rem; }
+.civ-notice-label { margin: 0; display: inline-flex; align-items: center; gap: .65rem; color: #1763d5; font-size: .82rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.civ-notice-label-icon { width: 2.6rem; height: 2.6rem; display: grid; place-items: center; border-radius: 12px; background: #e4efff; }
+.civ-notice-label-icon svg, .civ-notice-action svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.civ-notice-label-icon svg { width: 1.45rem; height: 1.45rem; }
+.civ-notice h1 { max-width: 13ch; margin: .15rem 0 0; color: #122f70; font-size: clamp(2.4rem, 4.5vw, 4.25rem); line-height: .98; }
+.civ-notice-copy > p:not(.civ-notice-label) { max-width: 42rem; margin: 0; color: #48659a; font-size: 1.08rem; line-height: 1.5; }
+.civ-notice-action { min-height: 3.2rem; margin-top: .45rem; display: inline-flex; align-items: center; gap: .7rem; padding: .8rem 1.2rem; border-radius: 11px; color: white; background: linear-gradient(180deg, #2875ef, #145ed6); font-weight: 800; box-shadow: 0 12px 24px rgba(24, 96, 214, .22); }
+.civ-notice-action:hover { transform: translateY(-2px); }
+.civ-notice-action svg { width: 1.25rem; height: 1.25rem; }
+.civ-poster { position: relative; z-index: 1; width: min(100%, 290px); justify-self: center; display: block; border-radius: 10px; box-shadow: 0 18px 32px rgba(8, 37, 82, .28); transition: transform .2s ease, box-shadow .2s ease; }
+.civ-poster:hover { transform: translateY(-4px) rotate(.35deg); box-shadow: 0 24px 38px rgba(8, 37, 82, .32); }
+.civ-poster img { display: block; width: 100%; height: auto; border-radius: inherit; }
 .hero-button svg,
 .hero-button svg,
 .section-action svg,
@@ -755,6 +794,7 @@ h2 {
 }
 
 @media (max-width: 900px) {
+  .civ-notice { grid-template-columns: 1fr minmax(210px, 260px); padding: 1.75rem; }
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -770,6 +810,11 @@ h2 {
   .shell {
     padding-inline: 0.85rem;
   }
+
+  .civ-notice { grid-template-columns: 1fr; padding: 1.35rem; border-radius: 22px; }
+  .civ-notice-copy { justify-items: center; text-align: center; }
+  .civ-notice h1 { max-width: 12ch; font-size: clamp(2.15rem, 11vw, 3.2rem); }
+  .civ-poster { width: min(100%, 270px); }
 
   .topbar,
   .panel,

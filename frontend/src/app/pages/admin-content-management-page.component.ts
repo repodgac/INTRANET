@@ -1,31 +1,27 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import type { ManagedContentDocument, ManagedContentLink } from '../core/models';
 import { ContentManagementService } from '../core/services/content-management.service';
 
 @Component({
   selector: 'app-admin-content-management-page',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
     <main class="content-shell">
-      <header class="content-header">
+      <header class="content-header page-heading">
         <div>
-          <p class="eyebrow">Panel administrativo</p>
-          <h1>Gestionar contenido</h1>
+          <h1>Gestion de contenido</h1>
           <p>Publique documentos, especificaciones y enlaces en el portal.</p>
         </div>
-        <nav>
-          <a routerLink="/admin/dashboard">Volver al dashboard</a>
-          <a routerLink="/">Ver portal</a>
-        </nav>
+        <button class="new-content" type="button" (click)="showCreatePanel.set(true)">＋ Nuevo contenido</button>
       </header>
 
       <p class="notice success" *ngIf="successMessage()">{{ successMessage() }}</p>
       <p class="notice error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
-      <section class="form-grid">
+      <section class="form-grid" *ngIf="showCreatePanel()" aria-label="Nuevo contenido">
+        <button class="modal-close" type="button" (click)="showCreatePanel.set(false)" aria-label="Cerrar formulario">×</button>
         <article class="panel">
           <div class="panel-heading">
             <div>
@@ -109,7 +105,6 @@ import { ContentManagementService } from '../core/services/content-management.se
       <section class="inventory panel">
         <div class="panel-heading">
           <div>
-            <p class="panel-tag">Inventario</p>
             <h2>Contenido publicado</h2>
           </div>
           <button class="secondary" type="button" (click)="loadContent()" [disabled]="loading()">
@@ -118,83 +113,55 @@ import { ContentManagementService } from '../core/services/content-management.se
         </div>
 
         <p class="empty" *ngIf="loading()">Cargando contenido...</p>
-        <div class="inventory-grid" *ngIf="!loading()">
-          <div class="inventory-column">
-            <h3>PDF ({{ pdfDocuments().length }})</h3>
-            <div class="list-scroll">
-              <article class="content-item" *ngFor="let item of pdfDocuments()">
-                <div class="item-copy">
-                  <strong>{{ item.title }}</strong>
-                  <p>{{ item.fileName }}<span *ngIf="!item.active"> · Inactivo</span></p>
-                  <time>Subido: {{ formatDate(item.createdAt) }}</time>
-                </div>
-                <div class="item-actions">
-                  <a [href]="item.filePath" target="_blank" rel="noopener">Abrir</a>
-                  <button class="danger" type="button" (click)="deleteDocument(item)"
-                    [disabled]="deletingKey() === 'document-' + item.databaseId">
-                    {{ deletingKey() === 'document-' + item.databaseId ? 'Procesando...' : 'Eliminar' }}
-                  </button>
-                </div>
-              </article>
-              <p class="empty" *ngIf="!pdfDocuments().length">No hay archivos PDF.</p>
-            </div>
-          </div>
-
-          <div class="inventory-column">
-            <h3>Word / Office ({{ officeDocuments().length }})</h3>
-            <div class="list-scroll">
-              <article class="content-item" *ngFor="let item of officeDocuments()">
-                <div class="item-copy">
-                  <strong>{{ item.title }}</strong>
-                  <p>{{ item.fileName }} · {{ item.fileType }}<span *ngIf="!item.active"> · Inactivo</span></p>
-                  <time>Subido: {{ formatDate(item.createdAt) }}</time>
-                </div>
-                <div class="item-actions">
-                  <a [href]="item.filePath" target="_blank" rel="noopener">Abrir</a>
-                  <button class="danger" type="button" (click)="deleteDocument(item)"
-                    [disabled]="deletingKey() === 'document-' + item.databaseId">
-                    {{ deletingKey() === 'document-' + item.databaseId ? 'Procesando...' : 'Eliminar' }}
-                  </button>
-                </div>
-              </article>
-              <p class="empty" *ngIf="!officeDocuments().length">No hay documentos Word u Office.</p>
-            </div>
-          </div>
-
-          <div class="inventory-column">
-            <h3>Enlaces ({{ links().length }})</h3>
-            <div class="list-scroll">
-              <article class="content-item" *ngFor="let item of links()">
-                <div class="item-copy">
-                  <strong>{{ item.title }}</strong>
-                  <p>{{ item.url }}</p>
-                  <time>Agregado: {{ formatDate(item.createdAt) }}</time>
-                </div>
-                <div class="item-actions">
-                  <a [href]="item.url" target="_blank" rel="noopener">Abrir</a>
-                  <button class="danger" type="button" (click)="deleteLink(item)"
-                    [disabled]="deletingKey() === 'link-' + item.id">
-                    {{ deletingKey() === 'link-' + item.id ? 'Procesando...' : 'Eliminar' }}
-                  </button>
-                </div>
-              </article>
-              <p class="empty" *ngIf="!links().length">No hay enlaces.</p>
-            </div>
-          </div>
+        <div class="content-table-wrap" *ngIf="!loading()">
+          <table class="content-table">
+            <thead><tr><th>T&iacute;tulo</th><th>Tipo</th><th>Estado</th><th>Publicaci&oacute;n</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr class="group-row"><th colspan="5">PDF ({{ pdfDocuments().length }})</th></tr>
+              <tr *ngFor="let item of pdfDocuments()">
+                <td><strong>{{ item.title }}</strong><small>{{ item.fileName }}</small></td>
+                <td><span class="type-badge pdf">PDF</span></td>
+                <td><span class="status" [class.inactive]="!item.active">{{ item.active ? 'Publicado' : 'Inactivo' }}</span></td>
+                <td>{{ formatDate(item.createdAt) }}</td>
+                <td class="table-actions"><a [href]="item.filePath" target="_blank" rel="noopener">Abrir</a><button class="danger" type="button" (click)="deleteDocument(item)" [disabled]="deletingKey() === 'document-' + item.databaseId">Eliminar</button></td>
+              </tr>
+              <tr class="empty-row" *ngIf="!pdfDocuments().length"><td colspan="5">No hay archivos PDF.</td></tr>
+              <tr class="group-row"><th colspan="5">Word / Office ({{ officeDocuments().length }})</th></tr>
+              <tr *ngFor="let item of officeDocuments()">
+                <td><strong>{{ item.title }}</strong><small>{{ item.fileName }}</small></td>
+                <td><span class="type-badge office">{{ item.fileType || 'DOC' }}</span></td>
+                <td><span class="status" [class.inactive]="!item.active">{{ item.active ? 'Publicado' : 'Inactivo' }}</span></td>
+                <td>{{ formatDate(item.createdAt) }}</td>
+                <td class="table-actions"><a [href]="item.filePath" target="_blank" rel="noopener">Abrir</a><button class="danger" type="button" (click)="deleteDocument(item)" [disabled]="deletingKey() === 'document-' + item.databaseId">Eliminar</button></td>
+              </tr>
+              <tr class="empty-row" *ngIf="!officeDocuments().length"><td colspan="5">No hay documentos Word u Office.</td></tr>
+              <tr class="group-row"><th colspan="5">Enlaces ({{ links().length }})</th></tr>
+              <tr *ngFor="let item of links()">
+                <td><strong>{{ item.title }}</strong><small>{{ item.url }}</small></td>
+                <td><span class="type-badge link">Enlace</span></td>
+                <td><span class="status" [class.inactive]="!item.active">{{ item.active ? 'Publicado' : 'Inactivo' }}</span></td>
+                <td>{{ formatDate(item.createdAt) }}</td>
+                <td class="table-actions"><a [href]="item.url" target="_blank" rel="noopener">Abrir</a><button class="danger" type="button" (click)="deleteLink(item)" [disabled]="deletingKey() === 'link-' + item.id">Eliminar</button></td>
+              </tr>
+              <tr class="empty-row" *ngIf="!links().length"><td colspan="5">No hay enlaces.</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </main>
   `,
   styles: `
     :host { display: block; min-height: 100vh; }
-    .content-shell { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 1.5rem 0 3rem; display: grid; gap: 1rem; }
-    .content-header, .panel { border: 1px solid rgba(113, 155, 224, .2); border-radius: 26px; background: rgba(255,255,255,.96); box-shadow: 0 18px 44px rgba(34,82,158,.09); }
-    .content-header { padding: 1.4rem 1.6rem; display: flex; justify-content: space-between; align-items: end; gap: 1rem; }
-    h1, h2, h3, p { margin-top: 0; } h1 { margin-bottom: .35rem; color: #123f78; } h2 { margin-bottom: 0; color: #174982; }
+    .content-shell { width: 100%; margin: 0; padding: 0; display: grid; gap: 1rem; font-size: 13px; }
+    .content-header, .panel { border: 1px solid rgba(113, 155, 224, .2); border-radius: 14px; background: rgba(255,255,255,.96); box-shadow: 0 18px 44px rgba(34,82,158,.09); }
+    .content-header { padding: 0 0 .35rem; display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+    h1, h2, h3, p { margin-top: 0; } h1 { max-width: none; margin-bottom: .35rem; color: #123f78; font-size: 1.75rem; line-height: 1.08; } h2 { margin-bottom: 0; color: #174982; font-size: 1.125rem; }
     .eyebrow, .panel-tag { margin-bottom: .35rem; color: #1888a7; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
-    nav { display: flex; gap: .6rem; flex-wrap: wrap; } nav a, .secondary { border: 1px solid #b8cceb; border-radius: 12px; padding: .65rem .9rem; color: #174982; background: white; text-decoration: none; font-weight: 700; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .panel { padding: 1.35rem; } .panel-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .new-content { min-height: 42px; border: 0; border-radius: 8px; padding: .65rem 1rem; color: white; background: #125fd4; font-weight: 800; cursor: pointer; }
+    .form-grid { position: fixed; inset: 0; z-index: 60; display: grid; grid-template-columns: minmax(0, 520px) minmax(0, 520px); align-content: center; justify-content: center; gap: 1rem; padding: 4rem 1rem 1rem; background: rgba(5,22,45,.58); overflow-y: auto; }
+    .modal-close { position: fixed; top: 1rem; right: 1rem; width: 42px; height: 42px; border: 0; border-radius: 50%; background: white; color: #123c70; font-size: 1.5rem; cursor: pointer; }
+    .panel { padding: 1.1rem; } .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .9rem; }
+    .secondary { min-height: 40px; padding: .55rem .9rem; border: 1px solid #cbd9eb; border-radius: 8px; color: #185bc0; background: white; font-weight: 700; cursor: pointer; }
     form { display: grid; gap: .85rem; } label { display: grid; gap: .35rem; color: #173e70; font-weight: 700; }
     input, select, textarea { width: 100%; box-sizing: border-box; border: 1px solid #c5d5ed; border-radius: 12px; padding: .75rem .85rem; font: inherit; color: #173e70; background: #fbfdff; }
     textarea { resize: vertical; } small { color: #39718e; font-weight: 500; }
@@ -202,20 +169,21 @@ import { ContentManagementService } from '../core/services/content-management.se
     button:disabled { opacity: .55; cursor: not-allowed; }
     .notice { margin: 0; border-radius: 14px; padding: .8rem 1rem; font-weight: 700; } .success { color: #176c52; background: #e8faf4; } .error { color: #9b2e3b; background: #fff0f2; }
     .inventory { min-width: 0; overflow: hidden; }
-    .inventory-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; min-width: 0; }
-    .inventory-column { min-width: 0; border: 1px solid #dbe7f5; border-radius: 18px; padding: .9rem; background: #fbfdff; overflow: hidden; }
-    .inventory-column h3 { margin-bottom: .7rem; color: #174982; }
-    .list-scroll { max-height: 430px; overflow-y: auto; overflow-x: hidden; padding-right: .3rem; scrollbar-gutter: stable; }
-    .content-item { display: grid; gap: .65rem; min-width: 0; padding: .8rem 0; border-bottom: 1px solid #e4edf8; }
-    .item-copy { min-width: 0; overflow: hidden; }
-    .content-item p { margin: .2rem 0; color: #61758d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .content-item time { display: block; color: #7c8da2; font-size: .78rem; }
-    .content-item a { color: #167f9e; font-weight: 800; }
-    .item-actions { display: flex; align-items: center; gap: .55rem; flex-shrink: 0; }
+    .content-table-wrap { overflow-x: auto; border: 1px solid #dce6f3; border-radius: 10px; }
+    .content-table { width: 100%; min-width: 820px; border-collapse: collapse; table-layout: fixed; }
+    .content-table th:nth-child(1) { width: 42%; } .content-table th:nth-child(2) { width: 12%; } .content-table th:nth-child(3) { width: 13%; } .content-table th:nth-child(4) { width: 15%; } .content-table th:nth-child(5) { width: 18%; }
+    th, td { padding: .85rem 1rem; text-align: left; border-bottom: 1px solid #e4ebf4; }
+    thead { background: #edf3fb; color: #142d50; }
+    thead th { font-size: .78rem; }
+    td { color: #526b8a; } td strong, td small { display: block; } td strong { color: #142d50; } td small { max-width: 430px; margin-top: .2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #71839a; }
+    .group-row th { padding: .55rem 1rem; background: #f7faff; color: #31547f; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
+    .type-badge, .status { display: inline-flex; padding: .3rem .6rem; border-radius: 7px; font-size: .75rem; font-weight: 800; }
+    .type-badge.pdf { color: #ba3037; background: #ffe8e9; } .type-badge.office { color: #145ac7; background: #e7f1ff; } .type-badge.link { color: #17639e; background: #e4f4ff; }
+    .status { color: #19743c; background: #ddf7e5; } .status.inactive { color: #687180; background: #edf0f4; }
+    .table-actions { display: flex; align-items: center; justify-content: flex-start; gap: .55rem; white-space: nowrap; } .table-actions a { min-height: 36px; display: inline-flex; align-items: center; padding: .4rem .7rem; border: 1px solid #c7d9ef; border-radius: 7px; color: #145fd1; background: white; font-weight: 800; }
     .danger { border: 1px solid #efb7bd; border-radius: 10px; padding: .48rem .65rem; color: #a02e3c; background: #fff5f6; font-weight: 800; cursor: pointer; }
     .empty { color: #61758d; }
-    @media (max-width: 950px) { .inventory-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 760px) { .content-header { align-items: start; flex-direction: column; } .form-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { .content-header { align-items: start; flex-direction: column; } .new-content { width: 100%; } .form-grid { grid-template-columns: 1fr; align-content: start; } }
   `
 })
 export class AdminContentManagementPageComponent {
@@ -223,6 +191,7 @@ export class AdminContentManagementPageComponent {
 
   protected readonly documents = signal<ManagedContentDocument[]>([]);
   protected readonly links = signal<ManagedContentLink[]>([]);
+  protected readonly showCreatePanel = signal(false);
   protected readonly pdfDocuments = computed(() =>
     this.documents().filter((item) => item.fileType?.toUpperCase() === 'PDF')
   );
@@ -271,6 +240,7 @@ export class AdminContentManagementPageComponent {
     try {
       await this.content.uploadDocument({ ...this.documentForm, file });
       this.successMessage.set('Archivo publicado correctamente.');
+      this.showCreatePanel.set(false);
       this.documentForm = this.emptyDocumentForm();
       this.selectedFile.set(null);
       await this.loadContent();
@@ -287,6 +257,7 @@ export class AdminContentManagementPageComponent {
     try {
       await this.content.createLink(this.linkForm);
       this.successMessage.set('Enlace publicado correctamente.');
+      this.showCreatePanel.set(false);
       this.linkForm = this.emptyLinkForm();
       await this.loadContent();
     } catch (error) {
