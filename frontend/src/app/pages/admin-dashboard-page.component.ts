@@ -145,7 +145,7 @@ interface ActivityRow {
           <article class="panel table-panel">
             <div class="panel-heading">
               <div>
-                <h2>Documentos mas descargados</h2>
+                <h2>Documentos más descargados</h2>
               </div>
             </div>
 
@@ -157,7 +157,7 @@ interface ActivityRow {
                     <th>Documento</th>
                     <th>Tipo</th>
                     <th>Descargas</th>
-                    <th>Ultima descarga</th>
+                    <th>Última descarga</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -199,11 +199,11 @@ interface ActivityRow {
       </ng-template>
 
       <ng-template #noDocuments>
-        <div class="empty-state">Aun no hay documentos descargados para generar el ranking.</div>
+        <div class="empty-state">Aún no hay documentos descargados para generar el ranking.</div>
       </ng-template>
 
       <ng-template #noActivity>
-        <div class="empty-state">Todavia no hay actividad reciente almacenada.</div>
+        <div class="empty-state">Todavía no hay actividad reciente almacenada.</div>
       </ng-template>
     </main>
   `,
@@ -749,13 +749,13 @@ export class AdminDashboardPageComponent {
         {
           label: 'Visitas totales',
           value: this.formatCompact(snapshot.summary.totalVisits),
-          detail: this.formatDate(snapshot.summary.lastVisitAt, 'Ultima visita'),
+          detail: this.formatDate(snapshot.summary.lastVisitAt, 'Última visita'),
           accent: 'blue'
         },
         {
           label: 'Descargas totales',
           value: this.formatCompact(snapshot.summary.totalDownloads),
-        detail: this.formatDate(snapshot.summary.lastDownloadAt, 'Ultima descarga'),
+        detail: this.formatDate(snapshot.summary.lastDownloadAt, 'Última descarga'),
         accent: 'violet'
       },
       {
@@ -827,7 +827,7 @@ export class AdminDashboardPageComponent {
 
     const visitRows = snapshot.recentVisits.slice(0, 3).map((item) => ({
       icon: '↗',
-      title: 'Pagina visitada',
+      title: 'Página visitada',
       subtitle: item.path,
       timestamp: this.shortDateTime(item.visitedAt),
       orderValue: new Date(item.visitedAt).getTime()
@@ -850,7 +850,7 @@ export class AdminDashboardPageComponent {
       this.snapshot.set(await this.analytics.getDashboard());
     } catch {
       this.errorMessage.set(
-        'No fue posible cargar el dashboard. Revise la sesion del administrador o la API.'
+        'No fue posible cargar el dashboard. Revise la sesión del administrador o la API.'
       );
     } finally {
       this.loading.set(false);

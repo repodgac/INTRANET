@@ -56,7 +56,7 @@ export class AdminAuthService {
     const headers = this.authHeaders();
 
     if (!headers) {
-      throw new Error('Sesion no disponible.');
+      throw new Error('Sesión no disponible.');
     }
 
     try {
@@ -71,7 +71,7 @@ export class AdminAuthService {
       const session = this.sessionState();
 
       if (!session) {
-        throw new Error('Sesion no disponible.');
+        throw new Error('Sesión no disponible.');
       }
 
       this.persistSession({
@@ -87,7 +87,7 @@ export class AdminAuthService {
         'error' in error &&
         typeof (error as { error?: { message?: string } }).error?.message === 'string'
           ? (error as { error: { message: string } }).error.message
-          : 'No fue posible actualizar la contrasena.';
+          : 'No fue posible actualizar la contraseña.';
 
       throw new Error(message);
     }

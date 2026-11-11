@@ -68,7 +68,7 @@ export class AdminManagementService {
     const headers = this.auth.authHeaders();
 
     if (!headers) {
-      throw new Error('Sesion no disponible.');
+      throw new Error('Sesión no disponible.');
     }
 
     return headers;

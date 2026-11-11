@@ -35,7 +35,7 @@ interface PublicLinkResponse {
 const featuredLinks: FeaturedLink[] = [
   {
     id: 'portal-interno',
-    title: 'Direccion General de Aeronautica Civil',
+    title: 'Dirección General de Aeronáutica Civil',
     url: 'https://dgac.gob.gt/',
     description: 'Portal institucional oficial de la DGAC.',
     previewLabel: 'Sitio DGAC',
@@ -44,10 +44,10 @@ const featuredLinks: FeaturedLink[] = [
   },
   {
     id: 'tramites-dgac',
-    title: 'Portal de tramites DGAC',
+    title: 'Portal de trámites DGAC',
     url: 'https://tramites.dgac.gob.gt/auth',
-    description: 'Acceso para gestionar y autenticar tramites institucionales.',
-    previewLabel: 'Tramites DGAC',
+    description: 'Acceso para gestionar y autenticar trámites institucionales.',
+    previewLabel: 'Trámites DGAC',
     previewTone: 'tramites',
     imagePath: 'branding/dgac-header.png'
   },
@@ -55,7 +55,7 @@ const featuredLinks: FeaturedLink[] = [
     id: 'sistema-interno-dgac',
     title: 'Sistema interno DGAC',
     url: 'http://172.16.0.126/',
-    description: 'Acceso al sistema interno institucional para tramites, oficios y gestiones administrativas.',
+    description: 'Acceso al sistema interno institucional para trámites, oficios y gestiones administrativas.',
     previewLabel: 'Sistema interno DGAC',
     previewTone: 'dgac',
     imagePath: 'branding/dgac-oficial.jpeg'
@@ -64,7 +64,7 @@ const featuredLinks: FeaturedLink[] = [
     id: 'ministerio-civ',
     title: 'Ministerio de Comunicaciones, Infraestructura y Vivienda',
     url: 'https://www.civ.gob.gt/web/guest/inicio',
-    description: 'Sitio oficial del ministerio para consultas, informacion y publicaciones.',
+    description: 'Sitio oficial del ministerio para consultas, información y publicaciones.',
     previewLabel: 'Portal CIV',
     previewTone: 'ministry',
     imagePath: 'branding/mciv-oficial.png'
@@ -73,7 +73,7 @@ const featuredLinks: FeaturedLink[] = [
     id: 'radio-tgw',
     title: 'Radio TGW en linea',
     url: 'https://radiotgw.gob.gt/radio-tgw-en-linea/',
-    description: 'Acceso directo a la senal en linea de Radio TGW.',
+    description: 'Acceso directo a la señal en línea de Radio TGW.',
     previewLabel: 'TGW en linea',
     previewTone: 'radio',
     imagePath: 'branding/tgw-linea.png'
@@ -87,7 +87,7 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
     imagePath: 'branding/dgac-header.png'
   },
   'https://tramites.dgac.gob.gt/auth': {
-    previewLabel: 'Tramites DGAC',
+    previewLabel: 'Trámites DGAC',
     previewTone: 'tramites',
     imagePath: 'branding/dgac-header.png'
   },
@@ -115,7 +115,7 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
     <main class="shell">
       <header class="topbar" id="inicio">
         <div class="logo-single">
-          <img src="branding/dgac-header.png" alt="Direccion General de Aeronautica Civil" />
+          <img src="branding/dgac-header.png" alt="Dirección General de Aeronáutica Civil" />
         </div>
       </header>
 
@@ -144,8 +144,8 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
           <p class="eyebrow">Portal interno institucional</p>
           <h1>Consulta y descarga de documentos</h1>
           <p class="summary">
-            Acceda a formularios, documentos operativos y enlaces institucionales de la Direccion
-            General de Aeronautica Civil.
+            Acceda a formularios, documentos operativos y enlaces institucionales de la Dirección
+            General de Aeronáutica Civil.
           </p>
 
           <div class="hero-actions">
@@ -323,7 +323,7 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
         <ng-template #emptyHistory>
           <div class="history-empty">
             <strong>Sin descargas registradas</strong>
-            <p>Los documentos descargados apareceran aqui mientras la sesion permanezca activa.</p>
+            <p>Los documentos descargados aparecerán aquí mientras la sesión permanezca activa.</p>
           </div>
         </ng-template>
       </section>
@@ -338,7 +338,7 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
             </div>
             <div>
               <p class="section-tag green-text">Documentos descargables de especificaciones</p>
-              <h2>Especificaciones Tecnicas de Equipos de Computo</h2>
+              <h2>Especificaciones técnicas de equipos de cómputo</h2>
             </div>
           </div>
 
@@ -393,7 +393,7 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
                 <path d="M4.75 12c1.75-3 4.25-4.5 7.25-4.5S17.5 9 19.25 12c-1.75 3-4.25 4.5-7.25 4.5S6.5 15 4.75 12Z" />
                 <path d="M12 10.25a1.75 1.75 0 1 1 0 3.5 1.75 1.75 0 0 1 0-3.5Z" />
               </svg>
-              <span>Ver especificacion</span>
+              <span>Ver especificación</span>
             </div>
           </a>
         </div>
@@ -401,7 +401,7 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
         <ng-template #noSpecs>
           <div class="history-empty">
             <strong>Sin especificaciones publicadas</strong>
-            <p>Las especificaciones apareceran aqui cuando existan documentos PDF activos.</p>
+            <p>Las especificaciones aparecerán aquí cuando existan documentos PDF activos.</p>
           </div>
         </ng-template>
       </section>
@@ -451,7 +451,7 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
             </svg>
           </div>
           <div>
-            <strong>Direccion General de Aeronautica Civil</strong>
+            <strong>Dirección General de Aeronáutica Civil</strong>
             <p>Unidad De Tecnologías de la Información</p>
           </div>
         </div>

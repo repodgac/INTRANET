@@ -27,15 +27,15 @@ import { AdminManagementService } from '../core/services/admin-management.servic
         <article class="access-card form-card" *ngIf="showForm()">
           <div class="card-heading">
             <div>
-              <p class="card-tag">Alta rapida</p>
-              <h2>{{ editingId() ? 'Editar admin' : 'Agregar admin' }}</h2>
+              <p class="card-tag">Alta rápida</p>
+              <h2>{{ editingId() ? 'Editar administrador' : 'Agregar administrador' }}</h2>
             </div>
             <button type="button" class="ghost-button" (click)="resetForm()">Cerrar</button>
           </div>
 
           <form class="access-form" (ngSubmit)="submitForm()">
             <label>
-              <span>Login del dominio</span>
+              <span>Usuario del dominio</span>
               <input
                 type="text"
                 name="loginName"
@@ -68,8 +68,8 @@ import { AdminManagementService } from '../core/services/admin-management.servic
             <label>
               <span>Rol</span>
               <select name="role" [(ngModel)]="form.role">
-                <option value="admin">Admin</option>
-                <option value="super_admin">Super admin</option>
+                <option value="admin">Administrador</option>
+                <option value="super_admin">Superadministrador</option>
                 <option value="hr_admin">Administrador de RR. HH.</option>
               </select>
             </label>
@@ -88,7 +88,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
                   ? 'Guardando...'
                   : editingId()
                     ? 'Actualizar acceso'
-                    : 'Autorizar admin'
+                    : 'Autorizar administrador'
               }}
             </button>
           </form>
@@ -97,7 +97,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
         <article class="access-card list-card">
           <div class="card-heading">
             <div>
-              <h2>Admins autorizados</h2>
+              <h2>Administradores autorizados</h2>
             </div>
             <div class="toolbar-actions">
               <select
@@ -146,7 +146,7 @@ import { AdminManagementService } from '../core/services/admin-management.servic
           </div>
 
           <section class="state-block" *ngIf="!loading() && !filteredAdmins().length">
-            No hay admins registrados para el filtro seleccionado.
+            No hay administradores registrados para el filtro seleccionado.
           </section>
         </article>
       </section>
@@ -546,7 +546,7 @@ export class AdminAccessManagementPageComponent {
       } else {
         const created = await this.adminManagement.createAdmin(payload);
         this.admins.update((items) => this.sortAdmins([created, ...items]));
-        this.successMessage.set('Admin autorizado correctamente.');
+        this.successMessage.set('Administrador autorizado correctamente.');
       }
 
       this.resetForm();
@@ -572,7 +572,7 @@ export class AdminAccessManagementPageComponent {
   }
 
   protected async deleteAdmin(admin: ManagedAdminUser) {
-    const confirmed = window.confirm(`Se eliminara el acceso administrativo para ${admin.loginName}.`);
+    const confirmed = window.confirm(`Se eliminará el acceso administrativo para ${admin.loginName}.`);
 
     if (!confirmed) {
       return;
@@ -593,7 +593,7 @@ export class AdminAccessManagementPageComponent {
           this.sortAdmins(items.map((item) => (item.id === result.admin.id ? result.admin : item)))
         );
         this.successMessage.set(
-          'El admin tenia historial de actividad, por lo que su acceso fue desactivado.'
+          'El administrador tenía historial de actividad, por lo que su acceso fue desactivado.'
         );
       }
 

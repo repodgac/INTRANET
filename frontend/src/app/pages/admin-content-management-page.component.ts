@@ -11,7 +11,7 @@ import { ContentManagementService } from '../core/services/content-management.se
     <main class="content-shell">
       <header class="content-header page-heading">
         <div>
-          <h1>Gestion de contenido</h1>
+          <h1>Gestión de contenido</h1>
           <p>Publique documentos, especificaciones y enlaces en el portal.</p>
         </div>
         <button class="new-content" type="button" (click)="showCreatePanel.set(true)">＋ Nuevo contenido</button>
@@ -35,27 +35,27 @@ import { ContentManagementService } from '../core/services/content-management.se
               <span>Tipo de contenido</span>
               <select name="kind" [(ngModel)]="documentForm.kind" (ngModelChange)="selectedFile.set(null)">
                 <option value="form">Documento o formulario</option>
-                <option value="spec">Especificacion tecnica</option>
+                <option value="spec">Especificación técnica</option>
               </select>
             </label>
 
             <label>
-              <span>Titulo</span>
-              <input name="documentTitle" [(ngModel)]="documentForm.title" required placeholder="Titulo visible en el portal" />
+              <span>Título</span>
+              <input name="documentTitle" [(ngModel)]="documentForm.title" required placeholder="Título visible en el portal" />
             </label>
 
             <label>
-              <span>Descripcion</span>
+              <span>Descripción</span>
               <textarea name="documentDescription" [(ngModel)]="documentForm.description" rows="3"></textarea>
             </label>
 
             <label>
-              <span>Area o categoria</span>
-              <input name="documentArea" [(ngModel)]="documentForm.area" placeholder="Ej. Tecnologia" />
+              <span>Área o categoría</span>
+              <input name="documentArea" [(ngModel)]="documentForm.area" placeholder="Ej. Tecnología" />
             </label>
 
             <label class="file-field">
-              <span>Archivo (maximo 25 MB)</span>
+              <span>Archivo (máximo 25 MB)</span>
               <input
                 type="file"
                 [accept]="documentForm.kind === 'spec' ? '.pdf,application/pdf' : '.pdf,.doc,.docx,.xls,.xlsx'"
@@ -81,17 +81,17 @@ import { ContentManagementService } from '../core/services/content-management.se
 
           <form (ngSubmit)="createLink()">
             <label>
-              <span>Titulo</span>
+              <span>Título</span>
               <input name="linkTitle" [(ngModel)]="linkForm.title" required placeholder="Nombre del sitio o sistema" />
             </label>
 
             <label>
-              <span>Descripcion</span>
+              <span>Descripción</span>
               <textarea name="linkDescription" [(ngModel)]="linkForm.description" rows="3"></textarea>
             </label>
 
             <label>
-              <span>Direccion web</span>
+              <span>Dirección web</span>
               <input name="linkUrl" type="url" [(ngModel)]="linkForm.url" required placeholder="https://..." />
             </label>
 
@@ -269,7 +269,7 @@ export class AdminContentManagementPageComponent {
 
   protected async deleteDocument(item: ManagedContentDocument) {
     const confirmed = window.confirm(
-      `¿Eliminar "${item.title}"? Si tiene historial de descargas, se desactivara para conservar las estadisticas.`
+      `¿Eliminar "${item.title}"? Si tiene historial de descargas, se desactivará para conservar las estadísticas.`
     );
     if (!confirmed) return;
 
@@ -280,7 +280,7 @@ export class AdminContentManagementPageComponent {
       this.successMessage.set(
         result.mode === 'deleted'
           ? 'Documento eliminado correctamente.'
-          : 'El documento tenia historial y fue desactivado para conservar las estadisticas.'
+          : 'El documento tenía historial y fue desactivado para conservar las estadísticas.'
       );
       await this.loadContent();
     } catch (error) {

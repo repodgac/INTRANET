@@ -106,7 +106,7 @@ export class AdminLayoutComponent {
   protected readonly menuOpen = signal(false);
   protected readonly isCompact = signal(typeof window !== 'undefined' && window.innerWidth <= 820);
   protected readonly currentUser = this.auth.currentUser;
-  protected readonly roleName = computed(() => this.currentUser() ? roleLabel(this.currentUser()!.role) : 'Administracion');
+  protected readonly roleName = computed(() => this.currentUser() ? roleLabel(this.currentUser()!.role) : 'Administración');
   protected readonly navigation: NavigationItem[] = [
     { section: 'dashboard', label: 'Resumen', route: '/admin/dashboard' },
     { section: 'content', label: 'Contenido', route: '/admin/content' },
@@ -117,8 +117,8 @@ export class AdminLayoutComponent {
   protected canAccess(section: AdminSection) { return !!this.currentUser() && canAccessSection(this.currentUser()!.role, section); }
   protected disabledReason(section: AdminSection) {
     if (this.currentUser()?.role === 'hr_admin') return 'Disponible para administradores del portal.';
-    if (section === 'access') return 'Disponible solo para superadministracion.';
-    return 'Disponible para RR. HH. y superadministracion.';
+    if (section === 'access') return 'Disponible solo para superadministración.';
+    return 'Disponible para RR. HH. y superadministración.';
   }
   protected toggleMenu() { this.menuOpen.update((value) => !value); }
   protected closeMenu() { this.menuOpen.set(false); }

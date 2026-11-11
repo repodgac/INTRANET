@@ -12,7 +12,7 @@ import { landingPageForRole } from '../core/auth/role-access';
   <main class="login-shell">
     <section class="login-card">
       <p class="login-kicker">Acceso administrativo</p>
-      <h1>Login</h1>
+      <h1>Iniciar sesión</h1>
 
       <form class="login-form" (ngSubmit)="submitLogin()">
         <label class="field">
@@ -44,7 +44,7 @@ import { landingPageForRole } from '../core/auth/role-access';
             name="password"
             [(ngModel)]="password"
             autocomplete="current-password"
-            placeholder="Contrasena"
+            placeholder="Contraseña"
             required
           />
         </label>
@@ -54,7 +54,7 @@ import { landingPageForRole } from '../core/auth/role-access';
         </p>
 
         <button class="login-button" type="submit" [disabled]="submitting()">
-          {{ submitting() ? 'Ingresando...' : 'Login' }}
+          {{ submitting() ? 'Ingresando...' : 'Iniciar sesión' }}
         </button>
       </form>
     </section>
@@ -336,7 +336,7 @@ export class AdminLoginPageComponent {
         'error' in error &&
         typeof (error as { error?: { message?: string } }).error?.message === 'string'
           ? (error as { error: { message: string } }).error.message
-          : 'No fue posible iniciar sesion.';
+          : 'No fue posible iniciar sesión.';
 
       this.errorMessage.set(message);
     } finally {

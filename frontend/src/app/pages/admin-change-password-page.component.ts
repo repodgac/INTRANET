@@ -16,16 +16,16 @@ import { landingPageForRole } from '../core/auth/role-access';
           <h1>Cambie su contraseña temporal</h1>
           <p class="password-intro">
             Para proteger el acceso administrativo, debe definir una nueva contraseña antes de
-            entrar al dashboard.
+            entrar al panel administrativo.
           </p>
 
           <div class="password-rules">
             <strong>La nueva contraseña debe incluir:</strong>
             <ul>
               <li>Al menos 10 caracteres</li>
-              <li>Una letra mayuscula</li>
-              <li>Una letra minuscula</li>
-              <li>Un caracter especial</li>
+              <li>Una letra mayúscula</li>
+              <li>Una letra minúscula</li>
+              <li>Un carácter especial</li>
             </ul>
           </div>
         </div>
@@ -216,7 +216,7 @@ export class AdminChangePasswordPageComponent {
 
     try {
       await this.auth.changePassword(this.newPassword);
-      this.successMessage.set('Contraseña actualizada. Redirigiendo al dashboard...');
+      this.successMessage.set('Contraseña actualizada. Redirigiendo al panel administrativo...');
       const role = this.auth.currentUser()?.role;
       setTimeout(
         () => void this.router.navigateByUrl(role ? landingPageForRole(role) : '/admin/login'),
