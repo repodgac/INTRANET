@@ -32,6 +32,82 @@ interface PublicLinkResponse {
   url: string;
 }
 
+const staticDownloads: DownloadItem[] = [
+  {
+    id: 'solicitud-usuario',
+    title: 'Solicitud de usuario',
+    description: 'Formulario de alta o habilitación de usuario institucional.',
+    filePath: '/forms/solicitud-usuario.docx',
+    fileType: 'DOCX'
+  },
+  {
+    id: 'correo-institucional',
+    title: 'Solicitud de correo institucional',
+    description: 'Formulario para la asignación de cuenta de correo institucional.',
+    filePath: '/forms/correo-institucional.docx',
+    fileType: 'DOCX'
+  },
+  {
+    id: 'acceso-internet',
+    title: 'Solicitud de acceso a internet',
+    description: 'Formulario para la gestión de accesos a internet.',
+    filePath: '/forms/acceso-internet.docx',
+    fileType: 'DOCX'
+  },
+  {
+    id: 'tv-proyector',
+    title: 'Solicitud de TV y proyector',
+    description: 'Solicitud de equipo audiovisual para actividades institucionales.',
+    filePath: '/forms/tv-proyector.xlsx',
+    fileType: 'XLSX'
+  },
+  {
+    id: 'usuario-sistema-dgac',
+    title: 'Solicitud de usuario del sistema DGAC',
+    description: 'Formulario para la asignación de acceso a sistemas institucionales.',
+    filePath: '/forms/usuario-sistema-dgac.docx',
+    fileType: 'DOCX'
+  },
+  {
+    id: 'solicitud-carpeta-compartida',
+    title: 'Solicitud de carpeta compartida',
+    description: 'Solicitud para la habilitación de acceso a carpeta compartida institucional.',
+    filePath: '/forms/solicitud-carpeta-compartida.docx',
+    fileType: 'DOCX'
+  }
+];
+
+const staticSpecs: PendingPdfItem[] = [
+  {
+    id: 'computadora-escritorio',
+    title: 'Computadora de escritorio',
+    description: 'Especificaciones técnicas para equipo de cómputo de escritorio institucional.',
+    area: 'Equipo',
+    filePath: '/specs/computadora-escritorio.pdf'
+  },
+  {
+    id: 'computadora-portatil',
+    title: 'Computadora portátil',
+    description: 'Documento con requerimientos y características para computadora portátil.',
+    area: 'Movilidad',
+    filePath: '/specs/computadora-portatil.pdf'
+  },
+  {
+    id: 'escaner',
+    title: 'Escáner',
+    description: 'Ficha de especificaciones para equipo de digitalización y escaneo institucional.',
+    area: 'Periférico',
+    filePath: '/specs/escaner.pdf'
+  },
+  {
+    id: 'ups',
+    title: 'UPS',
+    description: 'Especificaciones técnicas para sistema de respaldo y protección eléctrica.',
+    area: 'Energía',
+    filePath: '/specs/ups.pdf'
+  }
+];
+
 const featuredLinks: FeaturedLink[] = [
   {
     id: 'portal-interno',
@@ -470,9 +546,9 @@ export class HomePageComponent {
   private readonly analytics = inject(AnalyticsService);
   private readonly railTargets = new WeakMap<HTMLElement, number>();
   private readonly railFrames = new WeakMap<HTMLElement, number>();
-  protected readonly downloads = signal<DownloadItem[]>([]);
+  protected readonly downloads = signal<DownloadItem[]>(staticDownloads);
   protected readonly links = signal(featuredLinks);
-  protected readonly pendingPdfItems = signal<PendingPdfItem[]>([]);
+  protected readonly pendingPdfItems = signal<PendingPdfItem[]>(staticSpecs);
   protected readonly showDownloadHistory = signal(false);
   protected readonly downloadHistory = signal<Array<DownloadItem & { downloadedAt: string }>>(this.readDownloadedDocs());
 
@@ -482,27 +558,30 @@ export class HomePageComponent {
   }
 
   protected async loadPortalData() {
-    try {
-      const [downloads, specs, links] = await Promise.all([
-        firstValueFrom(this.http.get<DownloadItem[]>('/api/public/forms')),
-        firstValueFrom(
-          this.http.get<Array<Omit<PendingPdfItem, 'area'> & { area?: string | null }>>('/api/public/specs')
-        ),
-        firstValueFrom(this.http.get<PublicLinkResponse[]>('/api/public/links'))
-      ]);
+    const [downloadsResult, specsResult, linksResult] = await Promise.allSettled([
+      firstValueFrom(this.http.get<DownloadItem[]>('/api/public/forms')),
+      firstValueFrom(
+        this.http.get<Array<Omit<PendingPdfItem, 'area'> & { area?: string | null }>>('/api/public/specs')
+      ),
+      firstValueFrom(this.http.get<PublicLinkResponse[]>('/api/public/links'))
+    ]);
 
-      this.downloads.set(downloads);
+    if (downloadsResult.status === 'fulfilled' && downloadsResult.value.length) {
+      this.downloads.set(downloadsResult.value);
+    }
 
+    if (specsResult.status === 'fulfilled' && specsResult.value.length) {
       this.pendingPdfItems.set(
-        specs.map((item) => ({
+        specsResult.value.map((item) => ({
           ...item,
           area: item.area || 'General'
         }))
       );
+    }
 
-      if (links.length) {
-        this.links.set(
-          links.map((link) => {
+    if (linksResult.status === 'fulfilled' && linksResult.value.length) {
+      this.links.set(
+        linksResult.value.map((link) => {
             const presentation = linkPresentationMap[link.url];
 
             return {
@@ -515,12 +594,7 @@ export class HomePageComponent {
               imagePath: presentation?.imagePath
             };
           })
-        );
-      }
-    } catch {
-      this.downloads.set([]);
-      this.pendingPdfItems.set([]);
-      this.links.set(featuredLinks);
+      );
     }
   }
 
