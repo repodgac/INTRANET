@@ -195,6 +195,45 @@ const linkPresentationMap: Record<string, Pick<FeaturedLink, 'previewLabel' | 'p
         </div>
       </header>
 
+      <section class="cyber-notice" aria-labelledby="cyber-notice-title">
+        <div class="cyber-notice-copy">
+          <p class="cyber-notice-label">
+            <span class="cyber-notice-label-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="m3 8.5 9-4 9 4-9 4-9-4Zm4 2.1V15c2.7 2 7.3 2 10 0v-4.4M20 9v5" />
+              </svg>
+            </span>
+            Programa de concientización en ciberseguridad
+          </p>
+          <h2 id="cyber-notice-title">Aprende a identificar el phishing</h2>
+          <p>
+            Reconoce correos sospechosos, protege tu información y pon a prueba lo aprendido en
+            esta capacitación interactiva.
+          </p>
+          <a
+            class="cyber-notice-action"
+            href="https://sistemaconcientizaciondgac.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Iniciar capacitación
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+          </a>
+        </div>
+        <a
+          class="cyber-notice-art"
+          href="https://sistemaconcientizaciondgac.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Abrir capacitación para aprender a identificar el phishing"
+        >
+          <img
+            src="branding/phishing-awareness.png"
+            alt="Ilustración de un correo electrónico bajo revisión de seguridad"
+          />
+        </a>
+      </section>
+
       <section class="civ-notice" aria-labelledby="civ-notice-title">
         <div class="civ-notice-copy">
           <p class="civ-notice-label">

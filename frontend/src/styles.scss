@@ -164,6 +164,107 @@ textarea {
 .civ-poster { position: relative; z-index: 1; width: min(100%, 290px); justify-self: center; display: block; border-radius: 10px; box-shadow: 0 18px 32px rgba(8, 37, 82, .28); transition: transform .2s ease, box-shadow .2s ease; }
 .civ-poster:hover { transform: translateY(-4px) rotate(.35deg); box-shadow: 0 24px 38px rgba(8, 37, 82, .32); }
 .civ-poster img { display: block; width: 100%; height: auto; border-radius: inherit; }
+
+.cyber-notice {
+  position: relative;
+  min-height: 25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, .8fr);
+  align-items: center;
+  gap: 2rem;
+  padding: 2.4rem 3.2rem;
+  overflow: hidden;
+  border: 2px solid #397cff;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 80% 35%, rgba(73, 142, 255, .2), transparent 34%),
+    linear-gradient(135deg, #fff 8%, #edf5ff 100%);
+  box-shadow: 0 20px 45px rgba(30, 87, 178, .14);
+}
+
+.cyber-notice::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, rgba(255, 255, 255, .65), transparent 55%);
+}
+
+.cyber-notice-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: start;
+  gap: .9rem;
+}
+
+.cyber-notice-label {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .75rem;
+  color: #1763d5;
+  font-size: .9rem;
+  font-weight: 850;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.cyber-notice-label-icon {
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #1763d5;
+  background: #e1edff;
+}
+
+.cyber-notice-label-icon svg,
+.cyber-notice-action svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cyber-notice-label-icon svg { width: 1.65rem; height: 1.65rem; }
+.cyber-notice h2 { max-width: 13ch; margin: .15rem 0 0; color: #123578; font-size: clamp(2.5rem, 4.4vw, 4.4rem); line-height: 1.02; letter-spacing: -.035em; }
+.cyber-notice-copy > p:not(.cyber-notice-label) { max-width: 47rem; margin: 0; color: #48659a; font-size: 1.12rem; line-height: 1.55; }
+
+.cyber-notice-action {
+  min-height: 3.5rem;
+  margin-top: .55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .8rem;
+  padding: .9rem 1.45rem;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(180deg, #2879f5, #125dd7);
+  font-size: 1rem;
+  font-weight: 850;
+  box-shadow: 0 14px 28px rgba(24, 96, 214, .25);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.cyber-notice-action:hover { transform: translateY(-2px); box-shadow: 0 18px 32px rgba(24, 96, 214, .32); }
+.cyber-notice-action svg { width: 1.35rem; height: 1.35rem; }
+
+.cyber-notice-art {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 570px);
+  justify-self: center;
+  display: block;
+  transition: transform .22s ease;
+}
+
+.cyber-notice-art:hover { transform: translateY(-4px) scale(1.015); }
+.cyber-notice-art img { display: block; width: 100%; height: auto; filter: drop-shadow(0 22px 24px rgba(22, 71, 151, .2)); }
 .hero-button svg,
 .hero-button svg,
 .section-action svg,
@@ -795,6 +896,7 @@ h2 {
 
 @media (max-width: 900px) {
   .civ-notice { grid-template-columns: 1fr minmax(210px, 260px); padding: 1.75rem; }
+  .cyber-notice { grid-template-columns: minmax(0, 1fr) minmax(280px, .72fr); padding: 2rem; }
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -815,6 +917,13 @@ h2 {
   .civ-notice-copy { justify-items: center; text-align: center; }
   .civ-notice h1 { max-width: 12ch; font-size: clamp(2.15rem, 11vw, 3.2rem); }
   .civ-poster { width: min(100%, 270px); }
+  .cyber-notice { min-height: auto; grid-template-columns: 1fr; gap: 1.25rem; padding: 1.4rem; border-radius: 22px; }
+  .cyber-notice-copy { justify-items: center; text-align: center; }
+  .cyber-notice-label { justify-content: center; font-size: .78rem; }
+  .cyber-notice h2 { max-width: 12ch; font-size: clamp(2.2rem, 11vw, 3.35rem); }
+  .cyber-notice-copy > p:not(.cyber-notice-label) { font-size: 1rem; }
+  .cyber-notice-action { width: 100%; }
+  .cyber-notice-art { width: min(100%, 390px); }
 
   .topbar,
   .panel,
